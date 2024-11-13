@@ -6,16 +6,20 @@
 #include "especial.h"
 typedef struct {
     unsigned char hp; // Quantidade de vida
-    unsigned char lado; // Tamanho da lateral
+    unsigned char tam_lado; // Tamanho da lateral
     unsigned char face; // Face frontal 
-    unsigned short x; // Posição x do centro do jogador
-	unsigned short y; // Posição y do centro do jogador
+    unsigned short x; // Posicao x do centro do jogador
+	unsigned short y; // Posicao y do centro do jogador
 	joystick *controle; // Controle do jogador
 	pistola *pistola; // Ataque normal 
     especial *especial; // Ataque especial
 
 } jogador;
 
-
+jogador* cria_jogador(unsigned char hp, unsigned char tam_lado, unsigned char face, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y);
+void mov_jogador(jogador *jog, char passos, unsigned char trajetoria, unsigned short max_x, unsigned short max_y);
+void ataque_jogador(jogador *jog);
+void especial_jogador(jogador *jog);
+void destroi_jogador(jogador *jog);
 
 #endif																									

@@ -1,4 +1,4 @@
-//Compilação: gcc main.c -o AS $(pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 --libs --cflags) (!)
+// gcc main.c jogador.c auxiliares.c -o AS $(pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 --libs --cflags)
 
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
@@ -6,6 +6,7 @@
 
 #include "jogador.h"
 #include "inimigos.h"
+#include "auxiliares.h"
 
 #include <stdio.h>
 
@@ -14,26 +15,34 @@
 
 int main(){ 
     al_init(); // Inicia biblioteca Allegro
-    al_init_primitives_addon(); // Inicializa imagens básicas
+    al_init_primitives_addon(); // Inicializa imagens basicas
     al_install_keyboard(); // Habilita entrada via teclado
 
-    ALLEGRO_TIMER* timer = al_create_timer(1.0 / 30.0); // Cria o relógio do jogo
+    ALLEGRO_TIMER* timer = al_create_timer(1.0 / 30.0); // Cria o relogio do jogo
 	ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue(); // Cria a fila de eventos
-	ALLEGRO_FONT* font = al_create_builtin_font(); // Carrega uma fonte padrão para escrever na tela 
+	ALLEGRO_FONT* font = al_create_builtin_font(); // Carrega uma fonte padrao para escrever na tela 
 	ALLEGRO_DISPLAY* disp = al_create_display(X_TELA, Y_TELA); // Cria uma janela para o programa
 
 	al_register_event_source(queue, al_get_keyboard_event_source()); // Insere  eventos de teclado na fila de eventos
 	al_register_event_source(queue, al_get_display_event_source(disp)); // Insere eventos de tela na fila de eventos
-	al_register_event_source(queue, al_get_timer_event_source(timer)); // Insere eventos de relógio na fila de eventos
+	al_register_event_source(queue, al_get_timer_event_source(timer)); // Insere eventos de relogio na fila de eventos
 
     ALLEGRO_EVENT event; // Guarda o evento capturado
-    al_start_timer(timer); // Inicializa o relógio do programa
+    al_start_timer(timer); // Inicializa o relogio do programa
+
+    jogador* player = cria_jogador(3, 20, 1, 10, Y_TELA/2, X_TELA, Y_TELA);
+    if (!player){
+        fprintf(stderr, "Erro ao criar jogador");
+        return 1;
+    }
+    imprime_jogador(player);
 
     while (1) {
         al_wait_for_event(queue, &event); // Captura eventos da fila
 
         if (event.type == 30){
             al_clear_to_color(al_map_rgb(0, 0, 0));
+            al_draw_filled_rectangle(player->x-player->tam_lado/2, player->y-player->tam_lado/2, player->x+player->tam_lado/2, player->y+player->tam_lado/2, al_map_rgb(255, 0, 0)); // Insere o quadrado do jogador na tela
             al_flip_display();
         }
         else if (event.type == 42 || event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) // Clique no X da tela ou esc para sair do programa
