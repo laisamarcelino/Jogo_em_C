@@ -4,6 +4,8 @@
 #include "joystick.h"
 #include "pistola.h"
 #include "especial.h"
+
+#define PASSOS_JOGADOR 10
 typedef struct {
     unsigned char hp; // Quantidade de vida
     unsigned char tam_lado; // Tamanho da lateral

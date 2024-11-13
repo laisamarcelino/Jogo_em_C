@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 
+
 #define X_TELA 800
 #define Y_TELA 700
 
@@ -35,7 +36,7 @@ int main(){
         fprintf(stderr, "Erro ao criar jogador");
         return 1;
     }
-    imprime_jogador(player);
+    unsigned char chave_joystick[4] = {0,0,0,0}; 
 
     while (1) {
         al_wait_for_event(queue, &event); // Captura eventos da fila
@@ -45,8 +46,52 @@ int main(){
             al_draw_filled_rectangle(player->x-player->tam_lado/2, player->y-player->tam_lado/2, player->x+player->tam_lado/2, player->y+player->tam_lado/2, al_map_rgb(255, 0, 0)); // Insere o quadrado do jogador na tela
             al_flip_display();
         }
+
+        else if (event.type == ALLEGRO_EVENT_KEY_DOWN){ // O botão foi pressionado
+            switch (event.keyboard.keycode) {
+                case ALLEGRO_KEY_UP:
+                    chave_joystick[0] = 1;
+                  
+                    break;
+                case ALLEGRO_KEY_DOWN:
+                    chave_joystick[1] = 1;
+                    
+                    break;
+                case ALLEGRO_KEY_LEFT:
+                    chave_joystick[2] = 1;
+                    
+                    break;
+                case ALLEGRO_KEY_RIGHT:
+                    chave_joystick[3] = 1;
+                    
+                    break;
+            }
+        }
+
+        else if (event.type == ALLEGRO_EVENT_KEY_UP) { // O botão foi solto
+            switch (event.keyboard.keycode) {
+                case ALLEGRO_KEY_UP:
+                    chave_joystick[0] = 0;
+                  
+                    break;
+                case ALLEGRO_KEY_DOWN:
+                    chave_joystick[1] = 0;
+                    
+                    break;
+                case ALLEGRO_KEY_LEFT:
+                    chave_joystick[2] = 0;
+                    
+                    break;
+                case ALLEGRO_KEY_RIGHT:
+                    chave_joystick[3] = 0;
+                    
+                    break;
+            }
+        }
+
         else if (event.type == 42 || event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) // Clique no X da tela ou esc para sair do programa
             break;
+        
     }
     
     al_destroy_font(font);
