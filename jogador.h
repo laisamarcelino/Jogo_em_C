@@ -1,26 +1,21 @@
-//square.h
-
-#ifndef __JOGADOR__ 																												
-#define __JOGADOR__		
+#ifndef __JOGADOR__ 
+#define __JOGADOR__
 
 #include "joystick.h"
-#define JOGADOR_STEP 20				
+#include "pistola.h"
+#include "especial.h"
+typedef struct {
+    unsigned char hp; // Quantidade de vida
+    unsigned char lado; // Tamanho da lateral
+    unsigned char face; // Face frontal 
+    unsigned short x; // Posição x do centro do jogador
+	unsigned short y; // Posição y do centro do jogador
+	joystick *controle; // Controle do jogador
+	pistola *pistola; // Ataque normal 
+    especial *especial; // Ataque especial
 
-//Definição de um quadrado
-typedef struct {																											
-	unsigned char side;																											
-	unsigned short x;																											
-	unsigned short y;
-	joystick *control;																											
-} jogador;							
+} jogador;
 
-// Cria o jogador --- !!
-jogador* jogador_create(unsigned char side, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y);
 
-// Define a movimentação do jogador		
-void jogador_move(jogador *element, unsigned char steps, unsigned char trajectory, unsigned short max_x, unsigned short max_y);	
 
-// Destroi a estrutura do jogador 
-void jogador_destroy(jogador *element);																				
-
-#endif	
+#endif																									
