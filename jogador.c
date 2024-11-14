@@ -1,4 +1,6 @@
 #include "jogador.h"
+#include "joystick.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -23,9 +25,21 @@ jogador* cria_jogador(unsigned char hp, unsigned char tam_lado, unsigned char fa
     return novo_jogador;
 }
 
-void mov_jogador(jogador *jog, char passos, unsigned char chave_joystick, unsigned short max_x, unsigned short max_y){
-    
+void mov_jogador(jogador* jog, char passos, unsigned short max_x, unsigned short max_y) {
+    if (jog->controle->cima && jog->y > jog->tam_lado / 2) {
+        jog->y -= passos * PASSOS_JOGADOR;
+    }
+    else if (jog->controle->baixo && jog->y < max_y - jog->tam_lado / 2) {
+        jog->y += passos * PASSOS_JOGADOR;
+    }
+    else if (jog->controle->esquerda && jog->x > jog->tam_lado / 2) {
+        jog->x -= passos * PASSOS_JOGADOR;
+    }
+    else if (jog->controle->direita && jog->x < max_x - jog->tam_lado / 2) {
+        jog->x += passos * PASSOS_JOGADOR;
+    }
 }
+
 void ataque_jogador(jogador *jog);
 void especial_jogador(jogador *jog);
 void destroi_jogador(jogador *jog);

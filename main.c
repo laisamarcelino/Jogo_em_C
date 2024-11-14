@@ -1,4 +1,4 @@
-// gcc main.c jogador.c auxiliares.c -o AS $(pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 --libs --cflags)
+// gcc main.c jogador.c auxiliares.c joystick.c -o AS $(pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 --libs --cflags)
 
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
@@ -7,6 +7,7 @@
 #include "jogador.h"
 #include "inimigos.h"
 #include "auxiliares.h"
+#include "joystick.h"
 
 #include <stdio.h>
 
@@ -31,17 +32,18 @@ int main(){
     ALLEGRO_EVENT event; // Guarda o evento capturado
     al_start_timer(timer); // Inicializa o relogio do programa
 
-    jogador* player = cria_jogador(3, 20, 1, 10, Y_TELA/2, X_TELA, Y_TELA);
+    jogador* player = cria_jogador(3, 20, 1, 50, Y_TELA/2, X_TELA, Y_TELA);
     if (!player){
         fprintf(stderr, "Erro ao criar jogador");
         return 1;
     }
-    unsigned char chave_joystick[4] = {0,0,0,0}; 
+    unsigned char chave_joystick[6] = {0,0,0,0,0,0}; 
 
     while (1) {
         al_wait_for_event(queue, &event); // Captura eventos da fila
 
         if (event.type == 30){
+            atualiza_posicao(player, X_TELA, Y_TELA);
             al_clear_to_color(al_map_rgb(0, 0, 0));
             al_draw_filled_rectangle(player->x-player->tam_lado/2, player->y-player->tam_lado/2, player->x+player->tam_lado/2, player->y+player->tam_lado/2, al_map_rgb(255, 0, 0)); // Insere o quadrado do jogador na tela
             al_flip_display();
@@ -51,42 +53,52 @@ int main(){
             switch (event.keyboard.keycode) {
                 case ALLEGRO_KEY_UP:
                     chave_joystick[0] = 1;
-                  
                     break;
                 case ALLEGRO_KEY_DOWN:
                     chave_joystick[1] = 1;
-                    
                     break;
                 case ALLEGRO_KEY_LEFT:
                     chave_joystick[2] = 1;
-                    
                     break;
                 case ALLEGRO_KEY_RIGHT:
                     chave_joystick[3] = 1;
-                    
+                    break;
+                case ALLEGRO_KEY_E:
+                    chave_joystick[4] = 1;
+                    break;
+                case ALLEGRO_KEY_X:
+                    chave_joystick[5] = 1;
+                    break;
+                default:
                     break;
             }
+            atualiza_joystick(player->controle, chave_joystick);
         }
 
         else if (event.type == ALLEGRO_EVENT_KEY_UP) { // O botão foi solto
             switch (event.keyboard.keycode) {
                 case ALLEGRO_KEY_UP:
                     chave_joystick[0] = 0;
-                  
                     break;
                 case ALLEGRO_KEY_DOWN:
                     chave_joystick[1] = 0;
-                    
                     break;
                 case ALLEGRO_KEY_LEFT:
                     chave_joystick[2] = 0;
-                    
                     break;
                 case ALLEGRO_KEY_RIGHT:
                     chave_joystick[3] = 0;
-                    
+                    break;
+                case ALLEGRO_KEY_E:
+                    chave_joystick[4] = 0;
+                    break;
+                case ALLEGRO_KEY_X:
+                    chave_joystick[5] = 0;
+                    break;
+                default:
                     break;
             }
+            atualiza_joystick(player->controle, chave_joystick);
         }
 
         else if (event.type == 42 || event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) // Clique no X da tela ou esc para sair do programa

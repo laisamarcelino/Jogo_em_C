@@ -1,4 +1,5 @@
 #include "joystick.h"
+#include <stdlib.h>
 #include <stdio.h>
 
 joystick* cria_joystick(){
@@ -15,17 +16,11 @@ joystick* cria_joystick(){
 
 	return elemento;	
 }
-joystick* atualiza_joystick(joystick *elemento, unsigned char chave_joystick[]){
-    if (chave_joystick[0])
-        elemento->cima = 1;
-    else if (chave_joystick[1])
-        elemento->baixo = 1;
-    else if (chave_joystick[2])
-        elemento->esquerda = 1;
-    else if (chave_joystick[3])
-        elemento->direita = 1;
-    else
-        return;
-
-    return elemento;
+void atualiza_joystick(joystick* controle, unsigned char chave_joystick[]) {
+    controle->cima = chave_joystick[0];
+    controle->baixo = chave_joystick[1];
+    controle->esquerda = chave_joystick[2];
+    controle->direita = chave_joystick[3];
+    controle->tiro = chave_joystick[4];
+    controle->especial = chave_joystick[5];
 }

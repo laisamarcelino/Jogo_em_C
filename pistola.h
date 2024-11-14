@@ -12,4 +12,8 @@ typedef struct {
     balas *tiros;
 } pistola;
 
+pistola* cria_pistola();
+void tiro_pistola(unsigned short x, unsigned short y, unsigned char trajetoria, pistola *pistola);
+void destroi_pistola
+
 #endif
