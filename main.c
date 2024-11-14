@@ -43,24 +43,26 @@ int main(){
         al_wait_for_event(queue, &event); // Captura eventos da fila
 
         if (event.type == 30){
-            atualiza_posicao(player, X_TELA, Y_TELA);
+            mov_jogador(player, 1, X_TELA, Y_TELA);
             al_clear_to_color(al_map_rgb(0, 0, 0));
             al_draw_filled_rectangle(player->x-player->tam_lado/2, player->y-player->tam_lado/2, player->x+player->tam_lado/2, player->y+player->tam_lado/2, al_map_rgb(255, 0, 0)); // Insere o quadrado do jogador na tela
+            for (balas *index = player->pistola->tiros; index != NULL; index = (balas*) index->prox) al_draw_filled_circle(index->x, index->y, 2, al_map_rgb(255, 0, 0)); //Insere as balas existentes disparadas pelo jogador na tela
+	    		if (player->pistola->timer) player->pistola->timer--; // Atualiza o cooldown da arma do jogador
             al_flip_display();
         }
 
         else if (event.type == ALLEGRO_EVENT_KEY_DOWN){ // O botão foi pressionado
             switch (event.keyboard.keycode) {
-                case ALLEGRO_KEY_UP:
+                case ALLEGRO_KEY_W:
                     chave_joystick[0] = 1;
                     break;
-                case ALLEGRO_KEY_DOWN:
+                case ALLEGRO_KEY_S:
                     chave_joystick[1] = 1;
                     break;
-                case ALLEGRO_KEY_LEFT:
+                case ALLEGRO_KEY_A:
                     chave_joystick[2] = 1;
                     break;
-                case ALLEGRO_KEY_RIGHT:
+                case ALLEGRO_KEY_D:
                     chave_joystick[3] = 1;
                     break;
                 case ALLEGRO_KEY_E:
@@ -77,16 +79,16 @@ int main(){
 
         else if (event.type == ALLEGRO_EVENT_KEY_UP) { // O botão foi solto
             switch (event.keyboard.keycode) {
-                case ALLEGRO_KEY_UP:
+                case ALLEGRO_KEY_W:
                     chave_joystick[0] = 0;
                     break;
-                case ALLEGRO_KEY_DOWN:
+                case ALLEGRO_KEY_S:
                     chave_joystick[1] = 0;
                     break;
-                case ALLEGRO_KEY_LEFT:
+                case ALLEGRO_KEY_A:
                     chave_joystick[2] = 0;
                     break;
-                case ALLEGRO_KEY_RIGHT:
+                case ALLEGRO_KEY_D:
                     chave_joystick[3] = 0;
                     break;
                 case ALLEGRO_KEY_E:

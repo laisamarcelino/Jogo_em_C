@@ -3,7 +3,7 @@
 
 #include "balas.h"
 
-#define PISTOLA_COOLDOWN 10 // Tempo de recarga do ataque especial
+#define PISTOLA_COOLDOWN 10 // Tempo de recarga do ataque
 
 typedef struct {
     unsigned char tipo;
@@ -12,8 +12,8 @@ typedef struct {
     balas *tiros;
 } pistola;
 
-pistola* cria_pistola();
-void tiro_pistola(unsigned short x, unsigned short y, unsigned char trajetoria, pistola *pistola);
-void destroi_pistola
+pistola* cria_pistola(unsigned char tipo, unsigned char dano);
+balas* tiro_pistola(unsigned short x, unsigned short y, unsigned char trajetoria, pistola *pistola);
+void destroi_pistola(pistola *elemento);
 
 #endif

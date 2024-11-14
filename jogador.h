@@ -9,7 +9,6 @@
 typedef struct {
     unsigned char hp; // Quantidade de vida
     unsigned char tam_lado; // Tamanho da lateral
-    unsigned char face; // Face frontal 
     unsigned short x; // Posicao x do centro do jogador
 	unsigned short y; // Posicao y do centro do jogador
 	joystick *controle; // Controle do jogador
