@@ -8,6 +8,7 @@
 #include "inimigos.h"
 #include "auxiliares.h"
 #include "joystick.h"
+#include "projeteis.h"
 
 #include <stdio.h>
 
@@ -42,12 +43,33 @@ int main(){
     while (1) {
         al_wait_for_event(queue, &event); // Captura eventos da fila
 
-        if (event.type == 30){
+        if (event.type == ALLEGRO_EVENT_TIMER) {
+            // Atualiza projéteis e verifica posições
+            atualiza_projetil(player->projeteis, X_TELA, Y_TELA);
+
+            // Atualiza posição do jogador
             mov_jogador(player, 1, X_TELA, Y_TELA);
+
+            // Limpa a tela
             al_clear_to_color(al_map_rgb(0, 0, 0));
-            al_draw_filled_rectangle(player->x-player->tam_lado/2, player->y-player->tam_lado/2, player->x+player->tam_lado/2, player->y+player->tam_lado/2, al_map_rgb(255, 0, 0)); // Insere o quadrado do jogador na tela
-            for (balas *index = player->pistola->tiros; index != NULL; index = (balas*) index->prox) al_draw_filled_circle(index->x, index->y, 2, al_map_rgb(255, 0, 0)); //Insere as balas existentes disparadas pelo jogador na tela
-	    		if (player->pistola->timer) player->pistola->timer--; // Atualiza o cooldown da arma do jogador
+
+            // Desenha projéteis
+            nodo_bala *atual = player->projeteis->inicio;
+            while (atual) {
+                al_draw_filled_circle(atual->x, atual->y, 5, al_map_rgb(255, 255, 0)); // Projétil amarelo
+                atual = atual->prox;
+            }
+
+            // Desenha o jogador
+            al_draw_filled_rectangle(
+                player->x - player->tam_lado / 2,
+                player->y - player->tam_lado / 2,
+                player->x + player->tam_lado / 2,
+                player->y + player->tam_lado / 2,
+                al_map_rgb(255, 0, 0)
+            );
+
+            // Atualiza a tela
             al_flip_display();
         }
 
@@ -67,6 +89,7 @@ int main(){
                     break;
                 case ALLEGRO_KEY_E:
                     chave_joystick[4] = 1;
+                    ataque_jogador(player);
                     break;
                 case ALLEGRO_KEY_X:
                     chave_joystick[5] = 1;

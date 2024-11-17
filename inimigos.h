@@ -14,6 +14,7 @@ typedef struct {
 	// Movimentação pré-definida do personagem	
 	pistola *pistola;
 
+
 } inimigo;
 
 

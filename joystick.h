@@ -13,7 +13,6 @@ typedef struct {
 
 joystick* cria_joystick();
 void atualiza_joystick(joystick* controle, unsigned char chave_joystick[]);
-
-
+void destroi_joystick(joystick* controle);
 
 #endif

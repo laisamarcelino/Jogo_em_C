@@ -24,3 +24,7 @@ void atualiza_joystick(joystick* controle, unsigned char chave_joystick[]) {
     controle->tiro = chave_joystick[4];
     controle->especial = chave_joystick[5];
 }
+
+void destroi_joystick(joystick* controle){
+    free(controle);
+}

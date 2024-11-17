@@ -17,7 +17,7 @@ jogador* cria_jogador(unsigned char hp, unsigned char tam_lado, unsigned char fa
     novo_jogador->x = x;
     novo_jogador->y = y;
     novo_jogador->controle = cria_joystick();
-    novo_jogador->pistola = cria_pistola(0, 1);
+    novo_jogador->projeteis = cria_projetil_lista(); // Inicializa a lista 
     //novo_jogador->especial = cria_especial();
 
     return novo_jogador;
@@ -38,13 +38,20 @@ void mov_jogador(jogador* jog, char passos, unsigned short max_x, unsigned short
     }
 }
 
-void ataque_jogador(jogador *jog){
-    balas *tiro;
+void ataque_jogador(jogador *jog) {
+    unsigned short x_tiro = jog->x + jog->tam_lado / 2; // Inicia na frente do jogador
+    unsigned short y_tiro = jog->y; // Na mesma altura do jogador
+    unsigned char trajetoria = 1; // Direção do projetil 
+    unsigned char dano = 1;
 
-    tiro = tiro_pistola(jog->x + jog->tam_lado/2, jog->y, 1, jog->pistola);
-    if (tiro)
-        jog->pistola->tiros = tiro;
+    insere_bala(jog->projeteis, x_tiro, y_tiro, trajetoria, dano);
 }
 
+
 void especial_jogador(jogador *jog);
-void destroi_jogador(jogador *jog);
+
+void destroi_jogador(jogador *jog){
+    destroi_projetil_lista(&(jog->projeteis));
+    destroi_joystick(jog->controle);
+    free(jog);
+}
