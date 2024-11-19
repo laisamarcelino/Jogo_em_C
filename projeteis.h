@@ -13,7 +13,6 @@ typedef struct nodo_bala {
 
 typedef struct {
     nodo_bala *inicio;
-    nodo_bala *ptr; // Ponteiro para algum nodo_bala da lista (iterador)
     unsigned char tamanho;
 } projetil_lista;
 

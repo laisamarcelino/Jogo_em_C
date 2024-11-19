@@ -3,8 +3,8 @@
 #include <stdio.h>
 
 joystick* cria_joystick(){
-    joystick *elemento = (joystick*) malloc (sizeof(joystick));						//Aloca memória na heap para um novo controle
-	if (!elemento) 
+    joystick *elemento = (joystick*) malloc (sizeof(joystick));
+    if (!elemento) 
         return NULL;	
  
 	elemento->cima = 0;	

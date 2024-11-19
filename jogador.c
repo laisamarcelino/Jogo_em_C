@@ -17,7 +17,7 @@ jogador* cria_jogador(unsigned char hp, unsigned char tam_lado, unsigned char fa
     novo_jogador->x = x;
     novo_jogador->y = y;
     novo_jogador->controle = cria_joystick();
-    novo_jogador->projeteis = cria_projetil_lista(); // Inicializa a lista 
+    novo_jogador->projeteis = cria_projetil_lista(); 
     //novo_jogador->especial = cria_especial();
 
     return novo_jogador;
@@ -46,7 +46,6 @@ void ataque_jogador(jogador *jog) {
 
     insere_bala(jog->projeteis, x_tiro, y_tiro, trajetoria, dano);
 }
-
 
 void especial_jogador(jogador *jog);
 
