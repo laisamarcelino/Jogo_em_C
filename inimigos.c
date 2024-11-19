@@ -25,13 +25,13 @@ unsigned short aleat (unsigned short min, unsigned short max){
 }
 
 void mov_inimigo(inimigo* inimigo, char passos, unsigned char tam_lado, unsigned short max_x, unsigned short max_y) {
-    unsigned char mov = 1;
+    static int fator = 1; // Para nao reiniciar a variavel
 
     if (!inimigo)
         return;
     
     switch (inimigo->tipo) {
-        case 1:
+        case 1: 
             inimigo->x -= passos * PASSOS_INIMIGO;
             break;
         case 2:
@@ -39,44 +39,35 @@ void mov_inimigo(inimigo* inimigo, char passos, unsigned char tam_lado, unsigned
             inimigo->y = (int)(max_y / 2 + (sin(inimigo->x * 0.01) * 250)); // Produz um movimento ondulatorio
             break;
         case 3:
-            inimigo->x -= passos * PASSOS_INIMIGO;
-
+            inimigo->x -= passos * PASSOS_INIMIGO-3;
+            inimigo->y = (int)(max_y / 2 + (sin(inimigo->x * 0.05) * 100)); // Produz um movimento ondulatorio
             break;
         case 4:
-            inimigo->x -= passos * PASSOS_INIMIGO;
+            inimigo->y += passos * PASSOS_INIMIGO; // Move para baixo
+            break;
+        case 5: 
+            // Verifica se o inimigo atingiu o limite superior
+            if (inimigo->y <= 0 + tam_lado / 2)
+                fator = 1;
+
+            // Verifica se o inimigo atingiu o limite inferior
+            if (inimigo->y >= max_y - tam_lado / 2)
+                fator = -1;
+
+            inimigo->y += passos * PASSOS_INIMIGO * fator;  // Move para cima
 
             break;
-        case 5:
-            if (inimigo->y <= 0 + tam_lado / 2) {
-                inimigo->y += passos * PASSOS_INIMIGO;  // Move para baixo
-            }
-            else if (inimigo->y >= max_y - tam_lado / 2) {
-                inimigo->y -= passos * PASSOS_INIMIGO;  // Move para cima
-            }
-            else {
-                if (mov == 1) {
-                    inimigo->y -= passos * PASSOS_INIMIGO; // Move para cima
-                    if (inimigo->y <= 0 + tam_lado / 2)
-                        mov = 0; // Altera direção
-                } else {
-                    inimigo->y += passos * PASSOS_INIMIGO; // Move para baixo
-                    if (inimigo->y >= max_y - tam_lado / 2)
-                        mov = 1; // Altera direção
-                }
-            }
-            break;
+
         default:
             break;
     
     }
-        
 
-    // Verifica se o inimigo saiu da tela
-    if (inimigo->x + tam_lado / 2 < 0) {
-        printf("Inimigo fora da tela. Reaparecendo...\n"); // DEBUG
+    // Verifica se o inimigo saiu da tela 
+    
+    if (inimigo->x - tam_lado / 2 < 0) {
         inimigo->x = max_x + tam_lado / 2;
         inimigo->y = aleat(tam_lado / 2, max_y - tam_lado / 2);
-        printf("Nova posição do inimigo: x = %d, y = %d\n", inimigo->x, inimigo->y); // DEBUG
     }
 
 }

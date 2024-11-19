@@ -57,7 +57,7 @@ int main(){
         fprintf(stderr, "Erro ao criar inimigo 3");
         return 1;
     }
-    inimigo* inimigo4 = cria_inimigo(4, 2, 50, -1, X_TELA-10, Y_TELA/2, X_TELA, Y_TELA);
+    inimigo* inimigo4 = cria_inimigo(4, 2, 50, -1, 50, 0, X_TELA, Y_TELA);
     if (!inimigo4){
         fprintf(stderr, "Erro ao criar inimigo 4");
         return 1;
@@ -104,7 +104,7 @@ int main(){
             al_draw_filled_rectangle(inimigo1->x-inimigo1->tam_lado/2, inimigo1->y-inimigo1->tam_lado/2, inimigo1->x+inimigo1->tam_lado/2, inimigo1->y+inimigo1->tam_lado/2, al_map_rgb(0, 0, 255));
             al_draw_filled_rectangle(inimigo2->x-inimigo2->tam_lado/2, inimigo2->y-inimigo2->tam_lado/2, inimigo2->x+inimigo2->tam_lado/2, inimigo2->y+inimigo2->tam_lado/2, al_map_rgb(255, 255, 255));
             al_draw_filled_rectangle(inimigo3->x-inimigo3->tam_lado/2, inimigo3->y-inimigo3->tam_lado/2, inimigo3->x+inimigo3->tam_lado/2, inimigo3->y+inimigo3->tam_lado/2, al_map_rgb(230, 200, 250));
-            al_draw_filled_rectangle(inimigo4->x-inimigo4->tam_lado/2, inimigo4->y-inimigo4->tam_lado/2, inimigo4->x+inimigo4->tam_lado/2, inimigo4->y+inimigo4->tam_lado/2, al_map_rgb(217, 100, 100));
+            al_draw_filled_rectangle(inimigo4->x-inimigo4->tam_lado/2, inimigo4->y-inimigo4->tam_lado/2, inimigo4->x+inimigo4->tam_lado/2, inimigo4->y+inimigo4->tam_lado/2, al_map_rgb(255, 255, 255));
 
             // Desenha boss
             al_draw_filled_rectangle(boss1->x-boss1->tam_lado/2, boss1->y-boss1->tam_lado/2, boss1->x+boss1->tam_lado/2, boss1->y+boss1->tam_lado/2, al_map_rgb(217, 100, 100));
