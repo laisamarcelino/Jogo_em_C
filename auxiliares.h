@@ -4,5 +4,6 @@
 #include "jogador.h"
 
 void imprime_jogador(jogador *jog);
-void atualiza_posicao(jogador* jog, unsigned short max_x, unsigned short max_y);
+
+
 #endif

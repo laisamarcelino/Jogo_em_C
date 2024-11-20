@@ -4,7 +4,7 @@
 #include <time.h>
 #include <math.h>
 
-inimigo* cria_inimigo(unsigned char tipo, unsigned char hp, unsigned char tam_lado, unsigned char dano, unsigned short x, unsigned short y,  unsigned short max_x, unsigned short max_y){
+inimigo* cria_inimigo(unsigned char tipo, unsigned char hp, unsigned char largura, unsigned char altura, unsigned char dano, unsigned short x, unsigned short y,  unsigned short max_x, unsigned short max_y){
     
     inimigo *novo_inimigo = (inimigo*)malloc(sizeof(inimigo));
     if (!novo_inimigo)
@@ -12,7 +12,8 @@ inimigo* cria_inimigo(unsigned char tipo, unsigned char hp, unsigned char tam_la
     
     novo_inimigo->tipo = tipo;
     novo_inimigo->hp = hp;
-    novo_inimigo->tam_lado = tam_lado;
+    novo_inimigo->largura = largura;
+    novo_inimigo->altura = altura;
     novo_inimigo->dano = dano;
     novo_inimigo->x = x;
     novo_inimigo->y = y;
@@ -24,7 +25,7 @@ unsigned short aleat (unsigned short min, unsigned short max){
     return min + rand() % (max+1 - min);
 }
 
-void mov_inimigo(inimigo* inimigo, char passos, unsigned char tam_lado, unsigned short max_x, unsigned short max_y) {
+void mov_inimigo(inimigo* inimigo, char passos, unsigned char largura, unsigned char altura, unsigned short max_x, unsigned short max_y) {
     static int fator = 1; // Para nao reiniciar a variavel
 
     if (!inimigo)
@@ -40,18 +41,18 @@ void mov_inimigo(inimigo* inimigo, char passos, unsigned char tam_lado, unsigned
             break;
         case 3:
             inimigo->x -= passos * PASSOS_INIMIGO-3;
-            inimigo->y = (int)(max_y / 2 + (sin(inimigo->x * 0.05) * 100)); // Produz um movimento ondulatorio
+            inimigo->y = (int)(max_y / 2 + (sin(inimigo->x * 0.05) * 100)); 
             break;
         case 4:
             inimigo->y += passos * PASSOS_INIMIGO; // Move para baixo
             break;
         case 5: 
             // Verifica se o inimigo atingiu o limite superior
-            if (inimigo->y <= 0 + tam_lado / 2)
+            if (inimigo->y <= 0 + altura / 2)
                 fator = 1;
 
             // Verifica se o inimigo atingiu o limite inferior
-            if (inimigo->y >= max_y - tam_lado / 2)
+            if (inimigo->y >= max_y - altura / 2)
                 fator = -1;
 
             inimigo->y += passos * PASSOS_INIMIGO * fator;  // Move para cima
@@ -64,12 +65,10 @@ void mov_inimigo(inimigo* inimigo, char passos, unsigned char tam_lado, unsigned
     }
 
     // Verifica se o inimigo saiu da tela 
-    
-    if (inimigo->x - tam_lado / 2 < 0) {
-        inimigo->x = max_x + tam_lado / 2;
-        inimigo->y = aleat(tam_lado / 2, max_y - tam_lado / 2);
+    if (inimigo->x - largura / 2 < 0) {
+        inimigo->x = max_x + largura / 2;
+        inimigo->y = aleat(largura / 2, max_y - largura / 2);
     }
-
 }
 
 void ataque_inimigo(inimigo *inimigo);

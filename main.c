@@ -17,6 +17,15 @@
 #define X_TELA 800
 #define Y_TELA 700
 
+unsigned char colisao(jogador *jogador, inimigo *inimigo){
+
+	if ((((inimigo->y-inimigo->altura/2 >= jogador->y-jogador->altura/2) && (jogador->y+jogador->altura/2 >= inimigo->y-inimigo->altura/2)) ||
+		((jogador->y-jogador->altura/2 >= inimigo->y-inimigo->altura/2) && (inimigo->y+inimigo->altura/2 >= jogador->y-jogador->altura/2))) && 
+		(((inimigo->x-inimigo->largura/2 >= jogador->x-jogador->largura/2) && (jogador->x+jogador->largura/2 >= inimigo->x-inimigo->largura/2)) ||
+		((jogador->x-jogador->largura/2 >= inimigo->x-inimigo->largura/2) && (inimigo->x+inimigo->largura/2 >= jogador->x-jogador->largura/2)))) return 1;
+	else return 0;
+}
+
 int main(){ 
     al_init(); // Inicia biblioteca Allegro
     al_init_primitives_addon(); // Inicializa imagens basicas
@@ -35,42 +44,47 @@ int main(){
     ALLEGRO_EVENT event; // Guarda o evento capturado
     al_start_timer(timer); // Inicializa o relogio do programa
 
-    jogador* player = cria_jogador(5, 20, 1, 50, Y_TELA/2, X_TELA, Y_TELA);
+    jogador* player = cria_jogador(5, 50, 50, 50, Y_TELA/2, X_TELA, Y_TELA);
     if (!player){
         fprintf(stderr, "Erro ao criar jogador");
         return 1;
     }
     unsigned char chave_joystick[6] = {0,0,0,0,0,0}; 
 
-    inimigo* inimigo1 = cria_inimigo(1, 2, 50, -1, X_TELA-10, Y_TELA/3, X_TELA, Y_TELA);
+    inimigo* inimigo1 = cria_inimigo(1, 2, 50, 50, -1, X_TELA-10, Y_TELA/3, X_TELA, Y_TELA);
     if (!inimigo1){
         fprintf(stderr, "Erro ao criar inimigo 1");
         return 1;
     }
-    inimigo* inimigo2 = cria_inimigo(2, 2, 50, -1, X_TELA-10, Y_TELA/2, X_TELA, Y_TELA);
+    inimigo* inimigo2 = cria_inimigo(2, 2, 50, 50, -1, X_TELA-10, Y_TELA/2, X_TELA, Y_TELA);
     if (!inimigo2){
         fprintf(stderr, "Erro ao criar inimigo 2");
         return 1;
     }
-    inimigo* inimigo3 = cria_inimigo(3, 2, 50, -1, X_TELA-10, Y_TELA-10, X_TELA, Y_TELA);
+    inimigo* inimigo3 = cria_inimigo(3, 2, 50, 50, -1, X_TELA-10, Y_TELA-10, X_TELA, Y_TELA);
     if (!inimigo3){
         fprintf(stderr, "Erro ao criar inimigo 3");
         return 1;
     }
-    inimigo* inimigo4 = cria_inimigo(4, 2, 50, -1, 50, 0, X_TELA, Y_TELA);
+    inimigo* inimigo4 = cria_inimigo(4, 2, 50, 50, -1, 50, 0, X_TELA, Y_TELA);
     if (!inimigo4){
         fprintf(stderr, "Erro ao criar inimigo 4");
         return 1;
     }
-    inimigo* boss1 = cria_inimigo(5, 3, 50, -1, X_TELA-10, Y_TELA/2, X_TELA, Y_TELA);
+    inimigo* boss1 = cria_inimigo(5, 5, 50, 50, -1, X_TELA-10, Y_TELA/2, X_TELA, Y_TELA);
     if (!boss1){
         fprintf(stderr, "Erro ao criar boos 1");
         return 1;
     }
-
+    inimigo* boss2 = cria_inimigo(5, 10, 50, 50, -1, X_TELA-10, Y_TELA/2, X_TELA, Y_TELA);
+    if (!boss2){
+        fprintf(stderr, "Erro ao criar boos 2");
+        return 1;
+    }
+    
     while (1) {
         al_wait_for_event(queue, &event); // Captura eventos da fila
-
+        
         if (event.type == ALLEGRO_EVENT_TIMER) {
             // Atualiza projéteis e verifica posições
             atualiza_projetil(player->projeteis, X_TELA, Y_TELA);
@@ -79,13 +93,18 @@ int main(){
             mov_jogador(player, 1, X_TELA, Y_TELA);
 
             // Movimenta inimigos
-            mov_inimigo(inimigo1, 1, 50, X_TELA, Y_TELA);
-            mov_inimigo(inimigo2, 1, 50, X_TELA, Y_TELA);
-            mov_inimigo(inimigo3, 1, 50, X_TELA, Y_TELA);
-            mov_inimigo(inimigo4, 1, 50, X_TELA, Y_TELA);
-
+            mov_inimigo(inimigo1, 1, 50, 50, X_TELA, Y_TELA);
+            //mov_inimigo(inimigo2, 1, 50, 50, X_TELA, Y_TELA);
+            //mov_inimigo(inimigo3, 1, 50, 50, X_TELA, Y_TELA);
+            //mov_inimigo(inimigo4, 1, 50, 50, X_TELA, Y_TELA);
+            
             // Movimenta boss
-            mov_inimigo(boss1, 1, 50, X_TELA, Y_TELA);
+            //mov_inimigo(boss1, 1, 50, 50, X_TELA, Y_TELA);
+            //mov_inimigo(boss2, 1, 50, 50, X_TELA, Y_TELA);
+
+            if (colisao(player, inimigo1)){
+                printf("colidiu\n");
+            }
 
             // Limpa a tela
             al_clear_to_color(al_map_rgb(0, 0, 0));
@@ -98,16 +117,17 @@ int main(){
             }
 
             // Desenha o jogador
-            al_draw_filled_rectangle(player->x - player->tam_lado/2, player->y - player->tam_lado/2, player->x + player->tam_lado/2, player->y + player->tam_lado/2, al_map_rgb(255, 0, 0));
+            al_draw_filled_rectangle(
+                player->x - player->largura / 2, player->y - player->altura / 2, player->x + player->largura / 2, player->y + player->altura / 2, al_map_rgb(255, 0, 0));
             
             // Desenha inimigos
-            al_draw_filled_rectangle(inimigo1->x-inimigo1->tam_lado/2, inimigo1->y-inimigo1->tam_lado/2, inimigo1->x+inimigo1->tam_lado/2, inimigo1->y+inimigo1->tam_lado/2, al_map_rgb(0, 0, 255));
-            al_draw_filled_rectangle(inimigo2->x-inimigo2->tam_lado/2, inimigo2->y-inimigo2->tam_lado/2, inimigo2->x+inimigo2->tam_lado/2, inimigo2->y+inimigo2->tam_lado/2, al_map_rgb(255, 255, 255));
-            al_draw_filled_rectangle(inimigo3->x-inimigo3->tam_lado/2, inimigo3->y-inimigo3->tam_lado/2, inimigo3->x+inimigo3->tam_lado/2, inimigo3->y+inimigo3->tam_lado/2, al_map_rgb(230, 200, 250));
-            al_draw_filled_rectangle(inimigo4->x-inimigo4->tam_lado/2, inimigo4->y-inimigo4->tam_lado/2, inimigo4->x+inimigo4->tam_lado/2, inimigo4->y+inimigo4->tam_lado/2, al_map_rgb(255, 255, 255));
+            al_draw_filled_rectangle(inimigo1->x-inimigo1->largura/2, inimigo1->y-inimigo1->altura/2, inimigo1->x+inimigo1->largura/2, inimigo1->y+inimigo1->altura/2, al_map_rgb(0, 0, 255));
+            //al_draw_filled_rectangle(inimigo2->x-inimigo2->largura/2, inimigo2->y-inimigo2->altura/2, inimigo2->x+inimigo2->largura/2, inimigo2->y+inimigo2->altura/2, al_map_rgb(255, 255, 255));
+            //al_draw_filled_rectangle(inimigo3->x-inimigo3->largura/2, inimigo3->y-inimigo3->altura/2, inimigo3->x+inimigo3->largura/2, inimigo3->y+inimigo3->altura/2, al_map_rgb(230, 200, 250));
+            //al_draw_filled_rectangle(inimigo4->x-inimigo4->largura/2, inimigo4->y-inimigo4->altura/2, inimigo4->x+inimigo4->altura/2, inimigo4->y+inimigo4->altura/2, al_map_rgb(255, 255, 255));
 
             // Desenha boss
-            al_draw_filled_rectangle(boss1->x-boss1->tam_lado/2, boss1->y-boss1->tam_lado/2, boss1->x+boss1->tam_lado/2, boss1->y+boss1->tam_lado/2, al_map_rgb(217, 100, 100));
+            //al_draw_filled_rectangle(boss1->x-boss1->largura/2, boss1->y-boss1->altura/2, boss1->x+boss1->largura/2, boss1->y+boss1->altura/2, al_map_rgb(217, 100, 100));
 
 
             // Atualiza a tela
