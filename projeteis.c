@@ -26,14 +26,13 @@ void destroi_projetil_lista(projetil_lista **lista){
     (*lista) = NULL;
 }
 
-void insere_bala(projetil_lista *lista, unsigned short x, unsigned short y, unsigned char trajetoria, unsigned char dano){
+void insere_bala(projetil_lista *lista, unsigned short x, unsigned short y, unsigned char dano){
     nodo_bala *novo = (nodo_bala*)malloc(sizeof(nodo_bala));
     if (!novo)
         return;
 
     novo->x = x;
     novo->y = y;
-    novo->trajetoria = trajetoria;
     novo->dano = dano;
     novo->prox = lista->inicio;
     lista->inicio = novo;
@@ -52,7 +51,7 @@ void lista_remove_inicio(projetil_lista *lista){
     aux = NULL;
 }
 // Atualiza a posição dos projéteis e remove os que sairam da tela
-void atualiza_projetil(projetil_lista *lista, unsigned short max_x, unsigned short max_y) {
+void atualiza_projetil(projetil_lista *lista, short trajetoria, unsigned short max_x, unsigned short max_y) {
     if (!lista || lista->tamanho == 0)
         return;
 
@@ -60,8 +59,13 @@ void atualiza_projetil(projetil_lista *lista, unsigned short max_x, unsigned sho
     nodo_bala *anterior = NULL;
 
     while (atual) {
-        // Atualiza posição da bala
-        atual->x += VEL_BALA;
+        if (trajetoria == 1) {
+            // Atualiza posição da bala
+            atual->x += VEL_BALA;
+        }
+        else {
+            atual->x -= VEL_BALA;
+        }
 
         // Verifica se o projetil está fora da tela
         if (atual->x > max_x || atual->x < 0 || atual->y > max_y || atual->y < 0) {

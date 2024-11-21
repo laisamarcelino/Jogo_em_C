@@ -42,10 +42,9 @@ void mov_jogador(jogador* jog, char passos, unsigned short max_x, unsigned short
 void ataque_jogador(jogador *jog) {
     unsigned short x_tiro = jog->x + jog->largura / 2; // Inicia na frente do jogador
     unsigned short y_tiro = jog->y; // Na mesma altura do jogador
-    unsigned char trajetoria = 1; // Direção do projetil 
     unsigned char dano = 1;
 
-    insere_bala(jog->projeteis, x_tiro, y_tiro, trajetoria, dano);
+    insere_bala(jog->projeteis, x_tiro, y_tiro, dano);
 }
 
 void especial_jogador(jogador *jog);

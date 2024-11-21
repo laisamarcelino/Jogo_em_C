@@ -17,22 +17,13 @@
 #define X_TELA 800
 #define Y_TELA 700
 
-unsigned char colisao_players(jogador *jogador, inimigo *inimigo){
+unsigned char colisao(jogador *jogador, inimigo *inimigo){
 
 	if ((((inimigo->y-inimigo->altura/2 >= jogador->y-jogador->altura/2) && (jogador->y+jogador->altura/2 >= inimigo->y-inimigo->altura/2)) ||
 		((jogador->y-jogador->altura/2 >= inimigo->y-inimigo->altura/2) && (inimigo->y+inimigo->altura/2 >= jogador->y-jogador->altura/2))) && 
 		(((inimigo->x-inimigo->largura/2 >= jogador->x-jogador->largura/2) && (jogador->x+jogador->largura/2 >= inimigo->x-inimigo->largura/2)) ||
 		((jogador->x-jogador->largura/2 >= inimigo->x-inimigo->largura/2) && (inimigo->x+inimigo->largura/2 >= jogador->x-jogador->largura/2)))) return 1;
 	else return 0;
-}
-
-unsigned char colisao_projeteis(nodo_bala *projetil, inimigo *inimigo) {
-    return (
-        projetil->x >= inimigo->x - inimigo->largura / 2 &&
-        projetil->x <= inimigo->x + inimigo->largura / 2 &&
-        projetil->y >= inimigo->y - inimigo->altura / 2 &&
-        projetil->y <= inimigo->y + inimigo->altura / 2
-    );
 }
 
 int main(){ 
@@ -53,139 +44,109 @@ int main(){
     ALLEGRO_EVENT event; // Guarda o evento capturado
     al_start_timer(timer); // Inicializa o relogio do programa
 
-    unsigned char chave_joystick[6] = {0,0,0,0,0,0}; 
-
     jogador* player = cria_jogador(10, 50, 50, 50, Y_TELA/2, X_TELA, Y_TELA);
     if (!player){
         fprintf(stderr, "Erro ao criar jogador");
         return 1;
     }
+    unsigned char chave_joystick[6] = {0,0,0,0,0,0}; 
 
     inimigo* inimigo1 = cria_inimigo(1, 2, 50, 50, -1, X_TELA-10, Y_TELA/3, X_TELA, Y_TELA);
     if (!inimigo1){
         fprintf(stderr, "Erro ao criar inimigo 1");
         return 1;
     }
-
     inimigo* inimigo2 = cria_inimigo(2, 2, 50, 50, -1, X_TELA-10, Y_TELA/2, X_TELA, Y_TELA);
     if (!inimigo2){
         fprintf(stderr, "Erro ao criar inimigo 2");
         return 1;
     }
-
     inimigo* inimigo3 = cria_inimigo(3, 2, 50, 50, -1, X_TELA-10, Y_TELA-10, X_TELA, Y_TELA);
     if (!inimigo3){
         fprintf(stderr, "Erro ao criar inimigo 3");
         return 1;
     }
-
     inimigo* inimigo4 = cria_inimigo(4, 2, 50, 50, -1, 50, 0, X_TELA, Y_TELA);
     if (!inimigo4){
         fprintf(stderr, "Erro ao criar inimigo 4");
         return 1;
     }
-
     inimigo* boss1 = cria_inimigo(5, 5, 50, 50, -1, X_TELA-10, Y_TELA/2, X_TELA, Y_TELA);
     if (!boss1){
         fprintf(stderr, "Erro ao criar boos 1");
         return 1;
     }
-
     inimigo* boss2 = cria_inimigo(5, 10, 50, 50, -1, X_TELA-10, Y_TELA/2, X_TELA, Y_TELA);
     if (!boss2){
         fprintf(stderr, "Erro ao criar boos 2");
         return 1;
     }
     
-    unsigned char fase = 1;
-    unsigned char kill_inimigo1 = 0;
-
-
     while (1) {
         al_wait_for_event(queue, &event); // Captura eventos da fila
         
         if (event.type == ALLEGRO_EVENT_TIMER) {
-            if (fase == 1){
-                // Atualiza projéteis e verifica posições
-                atualiza_projetil(player->projeteis, 1, X_TELA, Y_TELA);
+            // Atualiza projéteis e verifica posições
+            atualiza_projetil(player->projeteis, 1, X_TELA, Y_TELA);
 
-                // Atualiza posição do jogador
-                mov_jogador(player, 1, X_TELA, Y_TELA);
+            // Atualiza posição do jogador
+            mov_jogador(player, 1, X_TELA, Y_TELA);
 
-                // Verifica colisões do projétil do jogador com o inimigo1
-                nodo_bala *atual_proj = player->projeteis->inicio;
-                nodo_bala *anterior_proj = NULL;
-                while (atual_proj) {
-                    if (colisao_projeteis(atual_proj, inimigo1)) {
-                        kill_inimigo1++;
-                        // Remove o projétil que colidiu
-                        if (!anterior_proj) {
-                            player->projeteis->inicio = atual_proj->prox;
-                        } else {
-                            anterior_proj->prox = atual_proj->prox;
-                        }
-                        free(atual_proj);
-                        break; 
-                    }
-                    anterior_proj = atual_proj;
-                    atual_proj = atual_proj->prox;
-                }
+            // Movimenta inimigos
+            mov_inimigo(inimigo1, 1, 50, 50, X_TELA, Y_TELA);
+            mov_inimigo(inimigo2, 1, 50, 50, X_TELA, Y_TELA);
+            //mov_inimigo(inimigo3, 1, 50, 50, X_TELA, Y_TELA);
+            //mov_inimigo(inimigo4, 1, 50, 50, X_TELA, Y_TELA);
 
-                // Movimenta inimigo1 somente se ele ainda não atingiu o limite de mortes
-                if (kill_inimigo1 < 10) {
-                    mov_inimigo(inimigo1, 1, 50, 50, X_TELA, Y_TELA);
-                }
-
-                mov_inimigo(inimigo2, 1, 50, 50, X_TELA, Y_TELA);
-
-                // Incrementa o contador de disparo do inimigo 2
-                inimigo2->contador_disparo++;
-                if (inimigo2->contador_disparo >= inimigo2->tempo_disparo) {
-                    ataque_inimigo(inimigo2); 
-                    inimigo2->contador_disparo = 0;
-                }
-
-                // Atualiza projéteis do inimigo 2
-                atualiza_projetil(inimigo2->projeteis, -1, X_TELA, Y_TELA);
-
-                // Limpa a tela
-                al_clear_to_color(al_map_rgb(0, 0, 0));
-
-                // Desenha projéteis do jogador
-                nodo_bala *atual = player->projeteis->inicio;
-                while (atual) {
-                    al_draw_filled_circle(atual->x, atual->y, 5, al_map_rgb(255, 255, 0)); 
-                    atual = atual->prox;
-                }
-
-                // Desenha projéteis do inimigo 2
-                nodo_bala *atual_inimigo = inimigo2->projeteis->inicio;
-                while (atual_inimigo) {
-                    al_draw_filled_circle(atual_inimigo->x, atual_inimigo->y, 5, al_map_rgb(255, 0, 0)); 
-                    atual_inimigo = atual_inimigo->prox;
-                }
-
-                // Movimenta boss
-                mov_inimigo(boss1, 1, 50, 50, X_TELA, Y_TELA);
-                
-
-                // Desenha o jogador
-                al_draw_filled_rectangle(player->x - player->largura / 2, player->y - player->altura / 2, player->x + player->largura / 2, player->y + player->altura / 2, al_map_rgb(255, 0, 0));
-                
-                // Desenha inimigos
-                if (kill_inimigo1 < 10)
-                    al_draw_filled_rectangle(inimigo1->x-inimigo1->largura/2, inimigo1->y-inimigo1->altura/2, inimigo1->x+inimigo1->largura/2, inimigo1->y+inimigo1->altura/2, al_map_rgb(0, 0, 255));
-
-                
-                al_draw_filled_rectangle(inimigo2->x-inimigo2->largura/2, inimigo2->y-inimigo2->altura/2, inimigo2->x+inimigo2->largura/2, inimigo2->y+inimigo2->altura/2, al_map_rgb(255, 255, 255));
-                
-                // Desenha boss
-                al_draw_filled_rectangle(boss1->x-boss1->largura/2, boss1->y-boss1->altura/2, boss1->x+boss1->largura/2, boss1->y+boss1->altura/2, al_map_rgb(217, 100, 100));
-
-                // Atualiza a tela
-                al_flip_display();
-
+            // Incrementa o contador de disparo do inimigo 2
+            inimigo2->contador_disparo++;
+            if (inimigo2->contador_disparo >= inimigo2->tempo_disparo) {
+                ataque_inimigo(inimigo2); // Inimigo dispara projétil
+                inimigo2->contador_disparo = 0;
             }
+
+            // Atualiza projéteis do inimigo 2
+            atualiza_projetil(inimigo2->projeteis, -1, X_TELA, Y_TELA);
+
+            // Limpa a tela
+            al_clear_to_color(al_map_rgb(0, 0, 0));
+
+            // Desenha projéteis do jogador
+            nodo_bala *atual = player->projeteis->inicio;
+            while (atual) {
+                al_draw_filled_circle(atual->x, atual->y, 5, al_map_rgb(255, 255, 0)); // Amarelo
+                atual = atual->prox;
+            }
+
+            // Desenha projéteis do inimigo 2
+            nodo_bala *atual_inimigo = inimigo2->projeteis->inicio;
+            while (atual_inimigo) {
+                al_draw_filled_circle(atual_inimigo->x, atual_inimigo->y, 5, al_map_rgb(255, 0, 0)); // Vermelho
+                atual_inimigo = atual_inimigo->prox;
+            }
+
+            // Movimenta boss
+            //mov_inimigo(boss1, 1, 50, 50, X_TELA, Y_TELA);
+            //mov_inimigo(boss2, 1, 50, 50, X_TELA, Y_TELA);
+
+            if (colisao(player, inimigo1)){
+                printf("colidiu\n");
+            }
+
+            // Desenha o jogador
+            al_draw_filled_rectangle(
+                player->x - player->largura / 2, player->y - player->altura / 2, player->x + player->largura / 2, player->y + player->altura / 2, al_map_rgb(255, 0, 0));
+            
+            // Desenha inimigos
+            al_draw_filled_rectangle(inimigo1->x-inimigo1->largura/2, inimigo1->y-inimigo1->altura/2, inimigo1->x+inimigo1->largura/2, inimigo1->y+inimigo1->altura/2, al_map_rgb(0, 0, 255));
+            al_draw_filled_rectangle(inimigo2->x-inimigo2->largura/2, inimigo2->y-inimigo2->altura/2, inimigo2->x+inimigo2->largura/2, inimigo2->y+inimigo2->altura/2, al_map_rgb(255, 255, 255));
+            
+            // Desenha boss
+            //al_draw_filled_rectangle(boss1->x-boss1->largura/2, boss1->y-boss1->altura/2, boss1->x+boss1->largura/2, boss1->y+boss1->altura/2, al_map_rgb(217, 100, 100));
+
+
+            // Atualiza a tela
+            al_flip_display();
         }
 
         else if (event.type == ALLEGRO_EVENT_KEY_DOWN){ // O botão foi pressionado
@@ -247,6 +208,9 @@ int main(){
     }
     
     destroi_inimigo(inimigo1);
+    destroi_inimigo(inimigo2);
+    destroi_inimigo(inimigo3);
+    destroi_inimigo(inimigo4);
     destroi_jogador(player);
     al_destroy_font(font);
 	al_destroy_display(disp);

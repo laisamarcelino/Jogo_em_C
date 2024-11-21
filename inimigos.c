@@ -18,9 +18,12 @@ inimigo* cria_inimigo(unsigned char tipo, unsigned char hp, unsigned char largur
     novo_inimigo->x = x;
     novo_inimigo->y = y;
     novo_inimigo->projeteis = cria_projetil_lista();
+    novo_inimigo->tempo_disparo = 30; // Dispara a cada 60 frames
+    novo_inimigo->contador_disparo = 0;
 
     return novo_inimigo;
 }
+
 unsigned short aleat (unsigned short min, unsigned short max){
     return min + rand() % (max+1 - min);
 }
@@ -71,7 +74,33 @@ void mov_inimigo(inimigo* inimigo, char passos, unsigned char largura, unsigned 
     }
 }
 
-void ataque_inimigo(inimigo *inimigo);
+void ataque_inimigo(inimigo *inimigo){
+    unsigned char dano;
+
+    unsigned short x_tiro = inimigo->x - inimigo->largura / 2; // Inicia na frente do inimigo
+    unsigned short y_tiro = inimigo->y; // Na mesma altura do inimigo
+    
+    switch (inimigo->tipo) {
+        case 2:
+            dano = 1;
+            break;
+        case 3:
+            dano = 2;
+            break;
+        case 4:
+            dano = 3;
+            break;
+        case 5:
+            dano = 3;
+            break;
+        
+        default:
+            break;
+    }
+
+    insere_bala(inimigo->projeteis, x_tiro, y_tiro, dano);
+}
+
 void especial_inimigo(inimigo *inimigo);
 
 void destroi_inimigo(inimigo *inimigo){
