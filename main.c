@@ -100,6 +100,7 @@ int main(){
     unsigned char fase = 1;
     unsigned char kill_inimigo1 = 0;
 
+    /* Ordem main: fundo - movimentacoes - projeteis */
 
     while (1) {
         al_wait_for_event(queue, &event); // Captura eventos da fila
