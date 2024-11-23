@@ -25,18 +25,18 @@ jogador* cria_jogador(unsigned char hp, unsigned char largura, unsigned char alt
 }
 
 void mov_jogador(jogador* jog, char passos, unsigned short max_x, unsigned short max_y) {
-    if (jog->controle->cima && jog->y > jog->altura / 2) {
+    if (jog->controle->cima && jog->y > jog->altura / 2) 
         jog->y -= passos * PASSOS_JOGADOR;
-    }
-    else if (jog->controle->baixo && jog->y < max_y - jog->altura / 2) {
+    
+    if (jog->controle->baixo && jog->y < max_y - jog->altura / 2) 
         jog->y += passos * PASSOS_JOGADOR;
-    }
-    else if (jog->controle->esquerda && jog->x > jog->largura / 2) {
+    
+    if (jog->controle->esquerda && jog->x > jog->largura / 2) 
         jog->x -= passos * PASSOS_JOGADOR;
-    }
-    else if (jog->controle->direita && jog->x < max_x - jog->largura / 2) {
+    
+    if (jog->controle->direita && jog->x < max_x - jog->largura / 2) 
         jog->x += passos * PASSOS_JOGADOR;
-    }
+    
 }
 
 void ataque_jogador(jogador *jog) {

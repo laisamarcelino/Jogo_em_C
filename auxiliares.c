@@ -9,4 +9,3 @@ void imprime_jogador(jogador *jog){
 }
 
 
-

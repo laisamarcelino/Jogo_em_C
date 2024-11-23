@@ -24,6 +24,14 @@ unsigned char colisao(jogador *jogador, inimigo *inimigo){
 		(((inimigo->x-inimigo->largura/2 >= jogador->x-jogador->largura/2) && (jogador->x+jogador->largura/2 >= inimigo->x-inimigo->largura/2)) ||
 		((jogador->x-jogador->largura/2 >= inimigo->x-inimigo->largura/2) && (inimigo->x+inimigo->largura/2 >= jogador->x-jogador->largura/2)))) return 1;
 	else return 0;
+
+}unsigned char colisao_projeteis(nodo_bala *projetil, inimigo *inimigo) {
+    return (
+        projetil->x >= inimigo->x - inimigo->largura / 2 &&
+        projetil->x <= inimigo->x + inimigo->largura / 2 &&
+        projetil->y >= inimigo->y - inimigo->altura / 2 &&
+        projetil->y <= inimigo->y + inimigo->altura / 2
+    );
 }
 
 int main(){ 
@@ -81,7 +89,9 @@ int main(){
         fprintf(stderr, "Erro ao criar boos 2");
         return 1;
     }
-    
+
+    int kill_inimigo1 = 0;
+
     while (1) {
         al_wait_for_event(queue, &event); // Captura eventos da fila
         
@@ -104,6 +114,38 @@ int main(){
                 ataque_inimigo(inimigo2); // Inimigo dispara projétil
                 inimigo2->contador_disparo = 0;
             }
+            // Verifica colisões do projétil do jogador com o inimigo1
+                nodo_bala *atual_proj = player->projeteis->inicio;
+                nodo_bala *anterior_proj = NULL;
+                while (atual_proj) {
+                    if (colisao_projeteis(atual_proj, inimigo1)) {
+                        kill_inimigo1++;
+                        // Remove o projétil que colidiu
+                        if (!anterior_proj) {
+                            player->projeteis->inicio = atual_proj->prox;
+                        } else {
+                            anterior_proj->prox = atual_proj->prox;
+                        }
+                        free(atual_proj);
+                        break; 
+                    }
+                    anterior_proj = atual_proj;
+                    atual_proj = atual_proj->prox;
+                }
+
+                // Movimenta inimigo1 somente se ele ainda não atingiu o limite de mortes
+                if (kill_inimigo1 < 10) {
+                    mov_inimigo(inimigo1, 1, 50, 50, X_TELA, Y_TELA);
+                }
+
+                mov_inimigo(inimigo2, 1, 50, 50, X_TELA, Y_TELA);
+
+                // Incrementa o contador de disparo do inimigo 2
+                inimigo2->contador_disparo++;
+                if (inimigo2->contador_disparo >= inimigo2->tempo_disparo) {
+                    ataque_inimigo(inimigo2); 
+                    inimigo2->contador_disparo = 0;
+                }
 
             // Atualiza projéteis do inimigo 2
             atualiza_projetil(inimigo2->projeteis, -1, X_TELA, Y_TELA);

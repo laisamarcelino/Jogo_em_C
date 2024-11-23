@@ -4,6 +4,6 @@
 #include "jogador.h"
 
 void imprime_jogador(jogador *jog);
-
+void desenha_fase1();
 
 #endif
