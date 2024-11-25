@@ -2,8 +2,9 @@
 #define __FUNCOES_AUXILIARES__																																	//Guardas de inclusão																															//Quantidade de pixels que um quadrado se move por passo
 
 #include "jogador.h"
+#include "inimigos.h"
 
 void imprime_jogador(jogador *jog);
-void desenha_fase1();
+void imprime_inimigo(inimigo *ini);
 
 #endif

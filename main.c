@@ -18,50 +18,100 @@
 
 #define X_TELA 1920
 #define Y_TELA 1080
+#define FRAMES_JOGADOR 5
+#define TEMPO_POR_FRAME 5
 
-unsigned char colisao_players(jogador *jogador, inimigo *inimigo){
+unsigned char verifica_colisao_players(jogador *jogador, inimigo *inimigo){
 
 	if ((((inimigo->y-inimigo->altura/2 >= jogador->y-jogador->altura/2) && (jogador->y+jogador->altura/2 >= inimigo->y-inimigo->altura/2)) ||
 		((jogador->y-jogador->altura/2 >= inimigo->y-inimigo->altura/2) && (inimigo->y+inimigo->altura/2 >= jogador->y-jogador->altura/2))) && 
 		(((inimigo->x-inimigo->largura/2 >= jogador->x-jogador->largura/2) && (jogador->x+jogador->largura/2 >= inimigo->x-inimigo->largura/2)) ||
 		((jogador->x-jogador->largura/2 >= inimigo->x-inimigo->largura/2) && (inimigo->x+inimigo->largura/2 >= jogador->x-jogador->largura/2)))){
             jogador->hp--;
-            inimigo->hp--;
+            inimigo->hp = 0;
+            inimigo->x = X_TELA + inimigo->largura / 2; // Remove inimigo da tela
+
+            return 1;
         } 
-	else 
-        return 0;
+       
+    return 0;
 }
 
-unsigned char colisao_projeteis(nodo_bala *projetil, inimigo *inimigo) {
+unsigned char colisao_projeteis(nodo_bala *projetil, jogador *player, inimigo *inimigo) {
+    
+    if (inimigo != NULL){
+        return (
+            projetil->x >= inimigo->x - inimigo->largura / 2 &&
+            projetil->x <= inimigo->x + inimigo->largura / 2 &&
+            projetil->y >= inimigo->y - inimigo->altura / 2 &&
+            projetil->y <= inimigo->y + inimigo->altura / 2
+        );
+    }
+
     return (
-        projetil->x >= inimigo->x - inimigo->largura / 2 &&
-        projetil->x <= inimigo->x + inimigo->largura / 2 &&
-        projetil->y >= inimigo->y - inimigo->altura / 2 &&
-        projetil->y <= inimigo->y + inimigo->altura / 2
-    );
+            projetil->x >= player->x - player->largura / 2 &&
+            projetil->x <= player->x + player->largura / 2 &&
+            projetil->y >= player->y - player->altura / 2 &&
+            projetil->y <= player->y + player->altura / 2
+        );
 }
+unsigned char verifica_colisao_projeteis(jogador *player, inimigo *inimigo) {
+    nodo_bala *atual_proj;
 
-// Colisão com redução de resistência do inimigo
-void verifica_colisao_projeteis(jogador *player, inimigo *inimigo) {
-    nodo_bala *atual_proj = player->projeteis->inicio;
+    // Verifica projéteis do jogador atingindo o inimigo
+    atual_proj = player->projeteis->inicio;
     nodo_bala *anterior_proj = NULL;
 
     while (atual_proj) {
-        if (colisao_projeteis(atual_proj, inimigo)) {
-            inimigo->hp--; 
-            if (!anterior_proj) {
+        if (colisao_projeteis(atual_proj, NULL, inimigo)) {
+            inimigo->hp--;
+            if (inimigo->hp <= 0) 
+                inimigo->x = X_TELA + inimigo->largura / 2; // Remove o inimigo da tela
+            
+            // Remove o projétil da lista
+            if (!anterior_proj) 
                 player->projeteis->inicio = atual_proj->prox;
-            } else {
+            else 
                 anterior_proj->prox = atual_proj->prox;
-            }
+            
             nodo_bala *remover = atual_proj;
             atual_proj = atual_proj->prox;
-            free(remover); // Remove o projétil
-        } else {
+            free(remover);
+            return 1; // O inimigo foi atingido
+        } 
+        else {
             anterior_proj = atual_proj;
             atual_proj = atual_proj->prox;
         }
     }
+
+    // Verifica projéteis dos inimigos atingindo o jogador
+    if (inimigo) {
+        atual_proj = inimigo->projeteis->inicio;
+        anterior_proj = NULL;
+
+        while (atual_proj) {
+            if (colisao_projeteis(atual_proj, player, NULL)) {
+                player->hp--;
+                // Remove o projétil da lista
+                if (!anterior_proj) 
+                    inimigo->projeteis->inicio = atual_proj->prox;
+                else 
+                    anterior_proj->prox = atual_proj->prox;
+                
+                nodo_bala *remover = atual_proj;
+                atual_proj = atual_proj->prox;
+                free(remover);
+                return 2; // O jogador foi atingido
+            } 
+            else {
+                anterior_proj = atual_proj;
+                atual_proj = atual_proj->prox;
+            }
+        }
+    }
+
+    return 0;
 }
 
 int main(){ 
@@ -83,6 +133,13 @@ int main(){
     ALLEGRO_EVENT event; // Guarda o evento capturado
     al_start_timer(timer); // Inicializa o relogio do programa
 
+    /* -------------------------- Variaveis de controle  ------------------------ */
+    unsigned char fase = 1;
+    unsigned char morte_inimigo1, morte_inimigo2, morte_boss = 0;
+    unsigned char chave_joystick[6] = {0,0,0,0,0,0};
+    gerencia_inimigos gerenciador = {.quantidade = 0}; // Inicializa o gerenciador de inimigos
+    unsigned short contador_gera_inimigos = 0;
+
     /* --------------------Criacao dos personagens -------------------------------------------- */
 
     jogador* player = cria_jogador(10, 50, 50, 50, Y_TELA/2, X_TELA, Y_TELA);
@@ -91,17 +148,7 @@ int main(){
         return 1;
     }
 
-    inimigo* inimigo1 = cria_inimigo(1, 1, 50, 50, -1, X_TELA-10, Y_TELA/3, X_TELA, Y_TELA);
-    if (!inimigo1){
-        fprintf(stderr, "Erro ao criar inimigo 1");
-        return 1;
-    }
-
-    inimigo* inimigo2 = cria_inimigo(2, 2, 50, 50, -1, X_TELA-10, Y_TELA/2, X_TELA, Y_TELA);
-    if (!inimigo2){
-        fprintf(stderr, "Erro ao criar inimigo 2");
-        return 1;
-    }
+    adiciona_inimigo(&gerenciador, 1, 2, 50, 50, -1, X_TELA, aleat(50, Y_TELA-50), X_TELA, Y_TELA);
 
     inimigo* inimigo3 = cria_inimigo(3, 2, 50, 50, -1, X_TELA-10, Y_TELA-10, X_TELA, Y_TELA);
     if (!inimigo3){
@@ -126,29 +173,24 @@ int main(){
         fprintf(stderr, "Erro ao criar boos 2");
         return 1;
     }
-    
-    /* -------------------------- Variaveis de controle  ------------------------ */
-    unsigned char fase = 1;
-    unsigned char morte_inimigo1, morte_inimigo2, morte_boss = 0;
-    unsigned char chave_joystick[6] = {0,0,0,0,0,0}; 
+
 
     /* --------------------------- Definicao de bitmaps ------------------------------*/
-    /*
-    ALLEGRO_BITMAP *buffer = al_create_bitmap(X_TELA, Y_TELA);
-    ALLEGRO_BITMAP *jogador_cima = al_load_bitmap("sprites/jogador_cima.bmp");
-    ALLEGRO_BITMAP *jogador_baixo = al_load_bitmap("sprites/jogador_baixo.bmp");
-    ALLEGRO_BITMAP *jogador_padrao = al_load_bitmap("sprites/jogador_padrao.bmp");
+    
+    unsigned char frame_atual, tempo_anim = 0; // Quadro atual, contador troca de quadro
 
-    
-    // Verifique se as sprites foram carregadas corretamente
-    if (!jogador_cima || !jogador_baixo || !jogador_padrao) {
-        fprintf(stderr, "Erro ao carregar sprites do jogador\n");
-        return -1;
+    ALLEGRO_BITMAP *sprites_jogador = al_load_bitmap("jogador.png");
+    if (!sprites_jogador){
+        fprintf(stderr, "Erro ao carregar sprites do jogador.\n");
+        return 1;
     }
-    */
-      
     
-    /* Ordem main: fundo - movimentacoes - projeteis */
+    // Calcula a largura e altura de cada quadro da sprite
+    unsigned short largura_quadro = al_get_bitmap_width(sprites_jogador) / FRAMES_JOGADOR;
+    unsigned short altura_quadro = al_get_bitmap_height(sprites_jogador);
+
+
+    /* --------------------------- Loop principal ------------------------------*/
 
     while (1) {
         al_wait_for_event(queue, &event); // Captura eventos da fila
@@ -156,28 +198,78 @@ int main(){
         if (event.type == ALLEGRO_EVENT_TIMER) {
             if (fase == 1){
                 
-                /* ------------- Movimentacoes -----------------  */
+                /* ------------------------------------------ Movimentacoes ------------------------------------------- */
                 if (player->hp > 0)
                     mov_jogador(player, 1, X_TELA, Y_TELA);
-
-                if (inimigo1->hp > 0)
-                    mov_inimigo(inimigo1, 1, 50, 50, X_TELA, Y_TELA);
-                
-                if (inimigo2->hp > 0)  
-                    mov_inimigo(inimigo2, 1, 50, 50, X_TELA, Y_TELA);
-
-                verifica_colisao_projeteis(player, inimigo1);
-                verifica_colisao_projeteis(player, inimigo2);
-
-                
+    
+                if (contador_gera_inimigos >= 200) { // A cada 100 frames (~3 segundos em 30 FPS)
+                    adiciona_inimigo(&gerenciador, aleat(1,2), 2, 50, 50, -1,  X_TELA-10, aleat(Y_TELA/4, Y_TELA-50), X_TELA, Y_TELA);
+                    contador_gera_inimigos = 0;
+                }
+                contador_gera_inimigos++; 
 
                 // Limpa a tela
                 al_clear_to_color(al_map_rgb(0, 0, 0));
 
-                /* --------------- Desenhos ----------------- */
+                for (int i = 0; i < gerenciador.quantidade; i++) {
+                    inimigo *atual = gerenciador.lista[i];
+                    if (atual->hp > 0) {
+                        mov_inimigo(atual, 1, 50, 50, X_TELA, Y_TELA);
+                        al_draw_filled_rectangle(atual->x - atual->largura / 2, atual->y - atual->altura / 2, atual->x + atual->largura / 2, atual->y + atual->altura / 2, al_map_rgb(0, 255, 0));
+                    }
+
+                    unsigned char c_players = verifica_colisao_players(player, atual);
+                    unsigned char c_projeteis = verifica_colisao_projeteis(player, atual);
+
+                    if (atual->tipo == 2){
+                        atual->contador_disparo++;
+                            
+                        // Incrementa o contador de disparo do inimigo 2
+                        if (atual->contador_disparo >= atual->tempo_disparo) {
+                            ataque_inimigo(atual); // Inimigo dispara projétil
+                            atual->contador_disparo = 0;
+                        }
+                        
+                        // Desenha projéteis do inimigo 2
+                        nodo_bala *atual_inimigo = atual->projeteis->inicio;
+                        while (atual_inimigo) {
+                            al_draw_filled_circle(atual_inimigo->x, atual_inimigo->y, 5, al_map_rgb(255, 0, 0)); // Vermelho 
+                            atual_inimigo = atual_inimigo->prox;
+                            
+                        }
+                        atualiza_projetil(atual->projeteis, -1, X_TELA, Y_TELA);
+                    }
+                }
+
+                if (boss1->hp > 0)
+                    mov_inimigo(boss1, 1, 50, 50, X_TELA, Y_TELA);
+
+                unsigned char c_p3 = verifica_colisao_players(player, boss1);
+                unsigned char c_p_boss = verifica_colisao_projeteis(player, boss1);
+
+                /* ------------------------------------------ Desenhos ------------------------------------------- */
 
                 if (player->hp > 0){
-                    al_draw_filled_rectangle(player->x - player->largura / 2, player->y - player->altura / 2, player->x + player->largura / 2, player->y + player->altura / 2, al_map_rgb(255, 0, 0));
+                    //al_draw_filled_rectangle(player->x - player->largura / 2, player->y - player->altura / 2, player->x + player->largura / 2, player->y + player->altura / 2, al_map_rgb(255, 0, 0));
+
+                    // Atualiza o contador de tempo para animação
+                    tempo_anim++;
+                    if (tempo_anim >= TEMPO_POR_FRAME) {
+                        tempo_anim = 0;
+                        frame_atual = (frame_atual + 1) % FRAMES_JOGADOR; // Alterna entre os quadros
+                    }
+
+                    // Calcula a posição do quadro atual na sprite sheet
+                    int x_quadro = frame_atual * largura_quadro;
+
+                    // Desenha o quadro atual na posição do jogador
+                    al_draw_bitmap_region(
+                        sprites_jogador,
+                        x_quadro, 0,                // Região do quadro atual
+                        largura_quadro, altura_quadro, // Dimensões do quadro
+                        player->x - largura_quadro / 2, player->y - altura_quadro / 2, // Posição na tela
+                        0 // Sem flags
+                    );
 
                     // Atualiza projéteis do jogador e verifica posições
                     atualiza_projetil(player->projeteis, 1, X_TELA, Y_TELA);
@@ -190,30 +282,20 @@ int main(){
                     }
                 }
 
-                if (inimigo1->hp > 0)
-                    al_draw_filled_rectangle(inimigo1->x-inimigo1->largura/2, inimigo1->y-inimigo1->altura/2, inimigo1->x+inimigo1->largura/2, inimigo1->y+inimigo1->altura/2, al_map_rgb(0, 0, 255));
-                
-                if (inimigo2->hp > 0){
-                    al_draw_filled_rectangle(inimigo2->x-inimigo2->largura/2, inimigo2->y-inimigo2->altura/2, inimigo2->x+inimigo2->largura/2, inimigo2->y+inimigo2->altura/2, al_map_rgb(255, 255, 255));
-                    // Atualiza projéteis do inimigo 2
-                    atualiza_projetil(inimigo2->projeteis, -1, X_TELA, Y_TELA);
+                /*
+                if (c_p1 || c_p2 || c_p3 || c_p_ini2 == 2 || c_p_boss == 2) {
+                    // Animação de desenho piscando 
+                    printf("pisquei\n");
+                }                 
+                */
 
-                    // Incrementa o contador de disparo do inimigo 2
-                    inimigo2->contador_disparo++;
-                    if (inimigo2->contador_disparo >= inimigo2->tempo_disparo) {
-                        ataque_inimigo(inimigo2); // Inimigo dispara projétil
-                        inimigo2->contador_disparo = 0;
+                for (int i = 0; i < gerenciador.quantidade; i++) {
+                    if (gerenciador.lista[i]->hp <= 0) {
+                        free(gerenciador.lista[i]);
+                        gerenciador.lista[i] = gerenciador.lista[--gerenciador.quantidade];
+                        i--; // Reajuste o índice
                     }
-
-                    // Desenha projéteis do inimigo 2
-                    nodo_bala *atual_inimigo = inimigo2->projeteis->inicio;
-                    while (atual_inimigo) {
-                        al_draw_filled_circle(atual_inimigo->x, atual_inimigo->y, 5, al_map_rgb(255, 0, 0)); // Vermelho
-                        atual_inimigo = atual_inimigo->prox;
-                    }
-                }  
-
-                
+                }
 
                 // Atualiza a tela
                 al_flip_display();
@@ -278,14 +360,13 @@ int main(){
             break;
         
     }
-
-    destroi_inimigo(inimigo1);
-    destroi_inimigo(inimigo2);
+    
     destroi_jogador(player);
     al_destroy_font(font);
 	al_destroy_display(disp);
 	al_destroy_timer(timer);
 	al_destroy_event_queue(queue);
+    al_destroy_bitmap(sprites_jogador);
 
     return 0;
 }

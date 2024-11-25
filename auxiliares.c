@@ -5,7 +5,10 @@
 #include <stdio.h>
 
 void imprime_jogador(jogador *jog){
-    printf("%u %u %u %u %u\n", jog->hp, jog->altura, jog->largura, jog->x, jog->y);
+    printf("%u\n", jog->hp);
 }
 
+void imprime_inimigo(inimigo *ini){
+    printf("%u\n", ini->hp);
 
+}

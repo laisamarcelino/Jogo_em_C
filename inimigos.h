@@ -3,6 +3,7 @@
 
 #include "projeteis.h"
 #define PASSOS_INIMIGO 5
+#define MAX_INIMIGOS 7
 
 typedef struct {
     unsigned char tipo;
@@ -17,13 +18,18 @@ typedef struct {
     unsigned short contador_disparo; // Contador para controle
 } inimigo;
 
+typedef struct {
+    inimigo *lista[MAX_INIMIGOS];
+    unsigned short quantidade;
+} gerencia_inimigos;
+
 inimigo* cria_inimigo(unsigned char tipo, unsigned char hp, unsigned char largura, unsigned char altura, unsigned char dano, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y);
 unsigned short aleat (unsigned short min, unsigned short max);
 void mov_inimigo(inimigo* inimigo, char passos, unsigned char largura, unsigned char altura, unsigned short max_x, unsigned short max_y);
 void ataque_inimigo(inimigo *inimigo);
 void especial_inimigo(inimigo *inimigo);
 void destroi_inimigo(inimigo *inimigo);
-
+void adiciona_inimigo(gerencia_inimigos *gerenciador, unsigned char tipo, unsigned char hp, unsigned char largura, unsigned char altura, unsigned char dano, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y);
 
 
 #endif

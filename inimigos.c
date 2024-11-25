@@ -107,3 +107,15 @@ void destroi_inimigo(inimigo *inimigo){
     destroi_projetil_lista(&(inimigo->projeteis));
     free(inimigo);
 }
+
+void adiciona_inimigo(gerencia_inimigos *gerenciador, unsigned char tipo, unsigned char hp, unsigned char largura, unsigned char altura, unsigned char dano, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y){
+    if (gerenciador->quantidade >= MAX_INIMIGOS)
+        return;
+    
+    inimigo *novo = cria_inimigo(tipo, hp, largura, altura, dano, x, y, max_x, max_y);
+    if (!novo){
+        fprintf(stderr, "Erro ao criar inimigo");
+        return;
+    }
+    gerenciador->lista[gerenciador->quantidade++] = novo;
+}

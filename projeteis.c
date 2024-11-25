@@ -72,7 +72,8 @@ void atualiza_projetil(projetil_lista *lista, short trajetoria, unsigned short m
             if (anterior == NULL) {
                 // Remove o primeiro nó
                 lista->inicio = atual->prox;
-            } else {
+            } 
+            else {
                 // Remove o nó atual
                 anterior->prox = atual->prox;
             }
@@ -80,7 +81,8 @@ void atualiza_projetil(projetil_lista *lista, short trajetoria, unsigned short m
             atual = atual->prox;
             free(removido);
             (lista->tamanho)--;
-        } else {
+        } 
+        else {
             // Avança para o próximo nó
             anterior = atual;
             atual = atual->prox;

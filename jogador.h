@@ -6,6 +6,7 @@
 #include "especial.h"
 
 #define PASSOS_JOGADOR 10
+
 typedef struct {
     unsigned char hp; // Quantidade de vida
     unsigned char largura;
