@@ -140,7 +140,7 @@ int main(){
     unsigned char fase = 1;
     unsigned char morte_inimigo1, morte_inimigo2, morte_boss = 0;
     unsigned char chave_joystick[6] = {0,0,0,0,0,0};
-    gerencia_inimigos gerenciador = {.quantidade = 0}; // Inicializa o gerenciador de inimigos
+    //gerencia_inimigos gerenciador = {.quantidade = 0}; // Inicializa o gerenciador de inimigos
     unsigned short contador_gera_inimigos = 0;
 
     /* --------------------Criacao dos personagens -------------------------------------------- */
@@ -151,7 +151,8 @@ int main(){
         return 1;
     }
 
-    adiciona_inimigo(&gerenciador, 1, 2, 50, 50, -1, X_TELA, aleat(50, Y_TELA-50), X_TELA, Y_TELA);
+    lista_inimigo* lista_inimigo = cria_lista_inimigo();
+    //adiciona_inimigo(&gerenciador, 1, 2, 50, 50, -1, X_TELA, aleat(50, Y_TELA-50), X_TELA, Y_TELA);
 
     inimigo* inimigo3 = cria_inimigo(3, 2, 50, 50, -1, X_TELA-10, Y_TELA-10, X_TELA, Y_TELA);
     if (!inimigo3){
@@ -207,7 +208,9 @@ int main(){
                 /* ------------------------------------------ Movimentacoes ------------------------------------------- */
                 if (player->hp > 0)
                     mov_jogador(player, 1, X_TELA, Y_TELA);
-    
+
+                /*
+                // corrigir vazamento de memoria, possivelmente sobreescreve um inimigo que ja existe
                 if (contador_gera_inimigos >= 200) { // A cada 100 frames (~3 segundos em 30 FPS)
                     adiciona_inimigo(&gerenciador, aleat(1,2), 2, 50, 50, -1,  X_TELA-10, aleat(Y_TELA/4, Y_TELA-50), X_TELA, Y_TELA);
                     contador_gera_inimigos = 0;
@@ -245,7 +248,9 @@ int main(){
                         }
                         atualiza_projetil(atual->projeteis, -1, X_TELA, Y_TELA);
                     }
-                }
+                }*/
+               
+            
 
                 if (boss1->hp > 0)
                     mov_inimigo(boss1, 1, 50, 50, X_TELA, Y_TELA);
@@ -294,13 +299,16 @@ int main(){
                 }                 
                 */
 
+                /*
                 for (int i = 0; i < gerenciador.quantidade; i++) {
+            
                     if (gerenciador.lista[i]->hp <= 0) {
+                        printf("%u\n", gerenciador.lista[i]->tipo);
                         free(gerenciador.lista[i]);
                         gerenciador.lista[i] = gerenciador.lista[--gerenciador.quantidade];
                         i--; // Reajuste o índice
                     }
-                }
+                }*/
 
                 // Atualiza a tela
                 al_flip_display();

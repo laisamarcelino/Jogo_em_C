@@ -107,7 +107,7 @@ void destroi_inimigo(inimigo *inimigo){
     destroi_projetil_lista(&(inimigo->projeteis));
     free(inimigo);
 }
-
+/*
 void adiciona_inimigo(gerencia_inimigos *gerenciador, unsigned char tipo, unsigned char hp, unsigned char largura, unsigned char altura, unsigned char dano, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y){
     if (gerenciador->quantidade >= MAX_INIMIGOS)
         return;
@@ -118,4 +118,40 @@ void adiciona_inimigo(gerencia_inimigos *gerenciador, unsigned char tipo, unsign
         return;
     }
     gerenciador->lista[gerenciador->quantidade++] = novo;
+}*/
+
+lista_inimigo* cria_lista_inimigo(){
+    lista_inimigo *nova_lista = (lista_inimigo*)malloc(sizeof(lista_inimigo));
+    if (!nova_lista)
+        return NULL;
+    
+    nova_lista->ini = NULL;
+    nova_lista->tamanho = 0;
+
+    return nova_lista;
+}
+
+void insere_inimigo(lista_inimigo *lista, inimigo* chave_inimigo, unsigned char tipo, unsigned char hp, unsigned char largura, unsigned char altura, unsigned char dano, unsigned short x, unsigned short y,  unsigned short max_x, unsigned short max_y){
+    nodo_inimigo *aux;
+
+    nodo_inimigo *novo_nodo = (nodo_inimigo*)malloc(sizeof(novo_nodo));
+    if (!novo_nodo) {
+        fprintf(stderr, "Erro ao criar inimigo");
+        return;
+    }
+    
+    novo_nodo->chave_inimigo = cria_inimigo(tipo, hp, largura, altura, dano, x, y, max_x, max_y);
+    novo_nodo->prox = NULL;
+
+    if (lista->ini == NULL)
+        lista->ini = novo_nodo;
+    else {
+        aux = lista->ini;
+        while (aux->prox != NULL)
+            aux = aux->prox;
+        aux->prox = novo_nodo;
+    }
+
+    (lista->tamanho)--;
+
 }
