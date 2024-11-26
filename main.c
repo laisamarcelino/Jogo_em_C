@@ -1,9 +1,10 @@
-// gcc main.c jogador.c auxiliares.c joystick.c inimigos.c projeteis.c -o AS $(pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 --libs --cflags) -lm
+// gcc main.c jogador.c auxiliares.c joystick.c inimigos.c projeteis.c -o AS $(pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 allegro_image-5 --libs --cflags) -lm
 
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
-#include <allegro5/allegro_primitives.h> // (!) Figuras basicas - trocar 
+#include <allegro5/allegro_primitives.h> 
 #include <allegro5/allegro_image.h>
+
 
 #include "jogador.h"
 #include "inimigos.h"
@@ -120,6 +121,7 @@ int main(){
     al_install_keyboard(); // Habilita entrada via teclado
     srand(time(NULL));
     al_set_new_display_flags(ALLEGRO_OPENGL);
+    al_init_image_addon();
 
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / 30.0); // Cria o relogio do jogo
 	ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue(); // Cria a fila de eventos
@@ -134,6 +136,7 @@ int main(){
     al_start_timer(timer); // Inicializa o relogio do programa
 
     /* -------------------------- Variaveis de controle  ------------------------ */
+
     unsigned char fase = 1;
     unsigned char morte_inimigo1, morte_inimigo2, morte_boss = 0;
     unsigned char chave_joystick[6] = {0,0,0,0,0,0};
@@ -179,12 +182,15 @@ int main(){
     
     unsigned char frame_atual, tempo_anim = 0; // Quadro atual, contador troca de quadro
 
-    ALLEGRO_BITMAP *sprites_jogador = al_load_bitmap("jogador.png");
+    ALLEGRO_BITMAP *sprites_jogador = al_load_bitmap("./sprites/jogador.png");
     if (!sprites_jogador){
         fprintf(stderr, "Erro ao carregar sprites do jogador.\n");
         return 1;
     }
     
+    // Converte a cor magenta (255, 0, 255) para transparência
+    al_convert_mask_to_alpha(sprites_jogador, al_map_rgb(255, 0, 255));
+
     // Calcula a largura e altura de cada quadro da sprite
     unsigned short largura_quadro = al_get_bitmap_width(sprites_jogador) / FRAMES_JOGADOR;
     unsigned short altura_quadro = al_get_bitmap_height(sprites_jogador);
@@ -250,7 +256,6 @@ int main(){
                 /* ------------------------------------------ Desenhos ------------------------------------------- */
 
                 if (player->hp > 0){
-                    //al_draw_filled_rectangle(player->x - player->largura / 2, player->y - player->altura / 2, player->x + player->largura / 2, player->y + player->altura / 2, al_map_rgb(255, 0, 0));
 
                     // Atualiza o contador de tempo para animação
                     tempo_anim++;
