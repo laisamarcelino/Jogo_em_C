@@ -1,7 +1,7 @@
 #ifndef __PROJETEIS__
 #define __PROJETEIS__ 
 
-#define VEL_BALA 10
+#define VEL_BALA 8
 
 typedef struct nodo_bala {
     unsigned short x;

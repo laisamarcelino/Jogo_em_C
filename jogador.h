@@ -5,7 +5,7 @@
 #include "projeteis.h"
 #include "especial.h"
 
-#define PASSOS_JOGADOR 10
+#define PASSOS_JOGADOR 7
 
 typedef struct {
     unsigned char hp; // Quantidade de vida
@@ -23,5 +23,6 @@ void mov_jogador(jogador* jog, char passos, unsigned short max_x, unsigned short
 void ataque_jogador(jogador *jog);
 void especial_jogador(jogador *jog);
 void destroi_jogador(jogador *jog);
+void manipula_jogador (jogador *jog, unsigned short max_x, unsigned short max_y);
 
 #endif																									

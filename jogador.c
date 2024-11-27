@@ -1,7 +1,12 @@
 #include "jogador.h"
-
+#include "projeteis.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <allegro5/allegro.h>
+#include <allegro5/allegro_primitives.h>
+
+#define FRAMES_JOGADOR 5
+#define TEMPO_POR_FRAME 5
 
 jogador* cria_jogador(unsigned char hp, unsigned char largura, unsigned char altura, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y){
     
@@ -53,4 +58,60 @@ void destroi_jogador(jogador *jog){
     destroi_projetil_lista(&(jog->projeteis));
     destroi_joystick(jog->controle);
     free(jog);
+}
+
+void manipula_jogador (jogador *jog, unsigned short max_x, unsigned short max_y){
+    unsigned char frame_atual, tempo_anim = 0; // Quadro atual, contador troca de quadro
+
+    ALLEGRO_BITMAP *sprites_jogador = al_load_bitmap("./sprites/jogador.png");
+    if (!sprites_jogador){
+        fprintf(stderr, "Erro ao carregar sprites do jogador.\n");
+        return;
+    }
+    
+    // Converte a cor magenta (255, 0, 255) para transparência
+    al_convert_mask_to_alpha(sprites_jogador, al_map_rgb(255, 0, 255));
+
+    // Calcula a largura e altura de cada quadro da sprite
+    unsigned short largura_quadro = al_get_bitmap_width(sprites_jogador) / FRAMES_JOGADOR;
+    unsigned short altura_quadro = al_get_bitmap_height(sprites_jogador);
+
+    if (jog->hp >= 0){
+
+        tempo_anim++;
+        if (tempo_anim >= TEMPO_POR_FRAME) {
+            frame_atual++;
+            tempo_anim = 0;
+        }
+
+        // Alterna os frames conforme o movimento
+        if (jog->controle->baixo) {
+            if (frame_atual < 1 || frame_atual > 2)
+                frame_atual = 1;
+        } else if (jog->controle->cima) {
+            if (frame_atual < 3 || frame_atual > 4)
+                frame_atual = 3;
+        } else {
+            frame_atual = 0;
+        }
+
+        al_clear_to_color(al_map_rgb(0, 0, 0));
+        al_draw_bitmap_region(
+            sprites_jogador,
+            frame_atual * largura_quadro, 0,
+            largura_quadro, altura_quadro,
+            jog->x - largura_quadro / 2, jog->y - altura_quadro / 2, 0
+        );
+
+        //al_draw_filled_rectangle(jog->x - jog->largura / 2, jog->y - jog->altura / 2, jog->x + jog->largura / 2, jog->y + jog->altura / 2, al_map_rgb(255, 0, 0));
+        mov_jogador(jog, 1, max_x, max_y);
+        atualiza_projetil(jog->projeteis, 1, max_x, max_y);
+
+        // Desenha projéteis do jogador
+        nodo_bala *atual = jog->projeteis->inicio;
+        while (atual) {
+            al_draw_filled_circle(atual->x, atual->y, 5, al_map_rgb(255, 255, 0)); // Amarelo
+            atual = atual->prox;
+        }
+    }  
 }
