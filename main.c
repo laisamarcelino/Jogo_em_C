@@ -8,7 +8,7 @@
 
 #include "jogador.h"
 #include "inimigos.h"
-#include "auxiliares.h"
+#include "./sem_uso/auxiliares.h"
 #include "joystick.h"
 #include "projeteis.h"
 

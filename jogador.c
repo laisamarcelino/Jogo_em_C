@@ -6,8 +6,6 @@
 #include <allegro5/allegro_primitives.h>
 
 #define FRAMES_JOGADOR 5
-#define FRAMES_PROJETIL 3 // Novo valor para a animação dos projéteis (ajuste conforme necessário)
-#define TEMPO_POR_FRAME 3
 
 jogador* cria_jogador(unsigned char hp, unsigned char largura, unsigned char altura, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y){
     
@@ -63,11 +61,9 @@ void destroi_jogador(jogador *jog){
 
 void manipula_jogador (jogador *jog, unsigned short max_x, unsigned short max_y){
     unsigned char frame_atual, tempo_anim = 0; // Quadro atual, contador troca de quadro
-    unsigned char tempo_anim_projetil = 0; // Contador para animação do projétil
-    unsigned char frame_atual_projetil = 0; // Quadro atual para animação do projétil
-
+   
     ALLEGRO_BITMAP *sprites_jogador = al_load_bitmap("./sprites/jogador.png");
-    ALLEGRO_BITMAP *sprites_projetil = al_load_bitmap("./sprites/projetil_jogador.png");
+    ALLEGRO_BITMAP *sprites_projetil = al_load_bitmap("./sprites/shot2.png");
 
     if (!sprites_jogador || !sprites_projetil) {
         fprintf(stderr, "Erro ao carregar sprites do jogador.\n");
@@ -117,25 +113,15 @@ void manipula_jogador (jogador *jog, unsigned short max_x, unsigned short max_y)
         mov_jogador(jog, 1, max_x, max_y);
         atualiza_projetil(jog->projeteis, 1, max_x, max_y);
 
-        // Desenha os projéteis com animação
+         // Desenha os projéteis com animação
         nodo_bala *atual = jog->projeteis->inicio;
         while (atual) {
-            tempo_anim_projetil++;
-            if (tempo_anim_projetil >= TEMPO_POR_FRAME) {
-                frame_atual_projetil++;
-                tempo_anim_projetil = 0;
-            }
-            // Alterna os frames do projétil (ajustando conforme necessário)
-            if (frame_atual_projetil >= FRAMES_PROJETIL)
-                frame_atual_projetil = 0;
-
             al_draw_bitmap_region(
                 sprites_projetil,
-                frame_atual_projetil * largura_quadro_projetil, 0,
+                atual->frame * largura_quadro_projetil, 0,
                 largura_quadro_projetil, altura_quadro_projetil,
                 atual->x - largura_quadro_projetil / 2, atual->y - altura_quadro_projetil / 2, 0
             );
-
             atual = atual->prox;
         }
     }  

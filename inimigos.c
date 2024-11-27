@@ -4,6 +4,8 @@
 #include <time.h>
 #include <math.h>
 
+#include <allegro5/allegro.h>
+
 inimigo* cria_inimigo(unsigned char tipo, unsigned char hp, unsigned char largura, unsigned char altura, unsigned char dano, unsigned short x, unsigned short y,  unsigned short max_x, unsigned short max_y){
     
     inimigo *novo_inimigo = (inimigo*)malloc(sizeof(inimigo));
@@ -108,28 +110,27 @@ void destroi_inimigo(inimigo *inimigo){
     free(inimigo);
 }
 
-/*
+
 lista_inimigo* cria_lista_inimigo(){
     lista_inimigo *nova_lista = (lista_inimigo*)malloc(sizeof(lista_inimigo));
     if (!nova_lista)
         return NULL;
     
     nova_lista->ini = NULL;
-    nova_lista->tamanho = 0;
 
     return nova_lista;
 }
 
-void insere_inimigo(lista_inimigo *lista, inimigo* chave_inimigo, unsigned char tipo, unsigned char hp, unsigned char largura, unsigned char altura, unsigned char dano, unsigned short x, unsigned short y,  unsigned short max_x, unsigned short max_y){
+void insere_inimigo(lista_inimigo *lista, inimigo* chave_inimigo){
     nodo_inimigo *aux;
 
     nodo_inimigo *novo_nodo = (nodo_inimigo*)malloc(sizeof(novo_nodo));
     if (!novo_nodo) {
-        fprintf(stderr, "Erro ao criar inimigo");
+        fprintf(stderr, "Erro ao criar inimigo\n");
         return;
     }
     
-    novo_nodo->chave_inimigo = cria_inimigo(tipo, hp, largura, altura, dano, x, y, max_x, max_y);
+    novo_nodo->chave_inimigo = chave_inimigo;
     novo_nodo->prox = NULL;
 
     if (lista->ini == NULL)
@@ -140,64 +141,30 @@ void insere_inimigo(lista_inimigo *lista, inimigo* chave_inimigo, unsigned char 
             aux = aux->prox;
         aux->prox = novo_nodo;
     }
-
-    (lista->tamanho)--;
-
 }
 
-// Função para inserir inimigos aleatoriamente na lista
-void gera_inimigo(lista_inimigo *lista, unsigned short max_x, unsigned short max_y) {
-    unsigned char tipo = aleat(1, 2); 
-    unsigned char hp = (tipo == 1) ? 3 : 2;
-    unsigned char largura = 50;
-    unsigned char altura = 50;
-    unsigned char dano = -1;
-    unsigned short x = max_x - 10; // Direita da tela
-    unsigned short y = aleat(50, max_y - 50); 
+lista_inimigo* gera_lista_inimigos(unsigned char largura, unsigned char altura, unsigned short max_x, unsigned short max_y) { 
+    unsigned short i = 1;
 
-    inimigo *novo_inimigo = cria_inimigo(tipo, hp, largura, altura, dano, x, y, max_x, max_y);
-    if (!novo_inimigo) {
-        fprintf(stderr, "Erro ao criar inimigo");
-        return;
+    lista_inimigo* lista = cria_lista_inimigo();
+
+    while (i <= MAX_INIMIGOS) {
+        unsigned char tipo = aleat(1, 2); 
+        unsigned char hp = (tipo == 1) ? 3 : 2;
+        unsigned char largura = altura;
+        unsigned char altura = largura;
+        unsigned char dano = 1;
+        unsigned short x = max_x - 10; 
+        unsigned short y = aleat(altura / 2, max_y - altura / 2); 
+
+        inimigo *novo_inimigo = cria_inimigo(tipo, hp, largura, altura, dano, x, y, max_x, max_y);
+        if (!novo_inimigo) {
+            fprintf(stderr, "Erro ao criar inimigo\n");
+            return;
+        }
+
+        insere_inimigo(lista, novo_inimigo);
     }
-    
-    insere_inimigo(lista, novo_inimigo, tipo, hp, largura, altura, dano, x, y, max_x, max_y);
 
+    return lista;
 }
-
-void atualiza_inimigos(lista_inimigo *lista, jogador *player, unsigned short max_x, unsigned short max_y) {
-    nodo_inimigo *atual = lista->ini;
-    while (atual) {
-        inimigo *inimigo_atual = atual->chave_inimigo;
-        if (inimigo_atual->hp > 0) {
-
-            mov_inimigo(inimigo_atual, 1, inimigo_atual->largura, inimigo_atual->altura, max_x, max_y);
-            
-            verifica_colisao_players(player, inimigo_atual);
-            verifica_colisao_projeteis(player, inimigo_atual);
-
-            al_draw_filled_rectangle(
-                inimigo_atual->x - inimigo_atual->largura / 2, inimigo_atual->y - inimigo_atual->altura / 2,
-                inimigo_atual->x + inimigo_atual->largura / 2, inimigo_atual->y + inimigo_atual->altura / 2,
-                al_map_rgb(255, 0, 0)
-            );
-        }
-
-        // Incrementa o contador de disparo do inimigo 2
-        if (inimigo_atual->contador_disparo >= inimigo_atual->tempo_disparo) {
-            ataque_inimigo(inimigo_atual); // Inimigo dispara projétil
-            inimigo_atual->contador_disparo = 0;
-        }
-                        
-        // Desenha projéteis do inimigo 2
-        nodo_bala *atual_inimigo = inimigo_atual->projeteis->inicio;
-        while (atual_inimigo) {
-            al_draw_filled_circle(atual_inimigo->x, atual_inimigo->y, 5, al_map_rgb(255, 0, 0)); // Vermelho 
-             atual_inimigo = atual_inimigo->prox;
-        }                
-        
-        atualiza_projetil(inimigo_atual->projeteis, -1, max_x, max_y);
-                
-        atual = atual->prox;
-    }
-}*/

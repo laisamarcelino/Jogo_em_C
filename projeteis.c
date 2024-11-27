@@ -50,7 +50,7 @@ void lista_remove_inicio(projetil_lista *lista){
     free(aux);
     aux = NULL;
 }
-// Atualiza a posição dos projéteis e remove os que sairam da tela
+
 void atualiza_projetil(projetil_lista *lista, short trajetoria, unsigned short max_x, unsigned short max_y) {
     if (!lista || lista->tamanho == 0)
         return;
@@ -59,31 +59,32 @@ void atualiza_projetil(projetil_lista *lista, short trajetoria, unsigned short m
     nodo_bala *anterior = NULL;
 
     while (atual) {
+        // Atualiza a posição do projétil
         if (trajetoria == 1) {
-            // Atualiza posição da bala
             atual->x += VEL_BALA;
-        }
-        else {
+        } else {
             atual->x -= VEL_BALA;
         }
 
-        // Verifica se o projetil está fora da tela
+        // Atualiza a animação do projétil
+        atual->tempo_anim++;
+        if (atual->tempo_anim >= TEMPO_POR_FRAME) {
+            atual->frame = (atual->frame + 1) % FRAMES_PROJETIL;
+            atual->tempo_anim = 0;
+        }
+
+        // Verifica se o projétil saiu da tela
         if (atual->x > max_x || atual->x < 0 || atual->y > max_y || atual->y < 0) {
             if (anterior == NULL) {
-                // Remove o primeiro nó
                 lista->inicio = atual->prox;
-            } 
-            else {
-                // Remove o nó atual
+            } else {
                 anterior->prox = atual->prox;
             }
             nodo_bala *removido = atual;
             atual = atual->prox;
             free(removido);
-            (lista->tamanho)--;
-        } 
-        else {
-            // Avança para o próximo nó
+            lista->tamanho--;
+        } else {
             anterior = atual;
             atual = atual->prox;
         }

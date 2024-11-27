@@ -1,12 +1,16 @@
 #ifndef __PROJETEIS__
 #define __PROJETEIS__ 
 
-#define VEL_BALA 2
+#define VEL_BALA 6
+#define TEMPO_POR_FRAME 15
+#define FRAMES_PROJETIL 3
 
 typedef struct nodo_bala {
     unsigned short x;
     unsigned short y;
     unsigned char dano;
+    unsigned char frame;
+    unsigned char tempo_anim;
     struct nodo_bala *prox;
 } nodo_bala;
 
