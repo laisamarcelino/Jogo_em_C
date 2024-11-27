@@ -6,6 +6,7 @@
 
 #define PASSOS_INIMIGO 5
 #define MAX_INIMIGOS 15
+#define FRAMES_INIMIGO 3
 
 typedef struct {
     unsigned char tipo;
@@ -37,7 +38,8 @@ void especial_inimigo(inimigo *inimigo);
 void destroi_inimigo(inimigo *inimigo);
 lista_inimigo* cria_lista_inimigo();
 void insere_inimigo(lista_inimigo *lista, inimigo* chave_inimigo);
-lista_inimigo* gera_lista_inimigos(unsigned char largura, unsigned char altura, unsigned short max_x, unsigned short max_y) { 
-void destroi_lista_inimigos(lista_inimigo *lista);
+lista_inimigo* gera_lista_inimigos(unsigned char largura, unsigned char altura, unsigned short max_x, unsigned short max_y);
+void destroi_lista_inimigos(lista_inimigo* lista);
+void manipula_inimigos (inimigo *inim, unsigned short max_x, unsigned short max_y);
 
 #endif

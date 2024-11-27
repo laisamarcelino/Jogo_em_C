@@ -63,7 +63,7 @@ void manipula_jogador (jogador *jog, unsigned short max_x, unsigned short max_y)
     unsigned char frame_atual, tempo_anim = 0; // Quadro atual, contador troca de quadro
    
     ALLEGRO_BITMAP *sprites_jogador = al_load_bitmap("./sprites/jogador.png");
-    ALLEGRO_BITMAP *sprites_projetil = al_load_bitmap("./sprites/shot2.png");
+    ALLEGRO_BITMAP *sprites_projetil = al_load_bitmap("./sprites/shot3.png");
 
     if (!sprites_jogador || !sprites_projetil) {
         fprintf(stderr, "Erro ao carregar sprites do jogador.\n");
