@@ -7,10 +7,7 @@
 
 #define FRAMES_JOGADOR 5
 
-jogador* cria_jogador(unsigned char hp, unsigned char largura, unsigned char altura, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y){
-    
-    // Verifica se a posição inicial eh valida
-    // Verifica se a face principal eh valida 
+jogador* cria_jogador(unsigned char hp, unsigned short largura, unsigned short altura, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y){
 
     jogador *novo_jogador = (jogador*)malloc(sizeof(jogador));
     if (!novo_jogador) 
@@ -63,7 +60,7 @@ void manipula_jogador (jogador *jog, unsigned short max_x, unsigned short max_y)
     unsigned char frame_atual, tempo_anim = 0; // Quadro atual, contador troca de quadro
    
     ALLEGRO_BITMAP *sprites_jogador = al_load_bitmap("./sprites/jogador.png");
-    ALLEGRO_BITMAP *sprites_projetil = al_load_bitmap("./sprites/shot3.png");
+    ALLEGRO_BITMAP *sprites_projetil = al_load_bitmap("./sprites/shot_jogador.png");
 
     if (!sprites_jogador || !sprites_projetil) {
         fprintf(stderr, "Erro ao carregar sprites do jogador.\n");

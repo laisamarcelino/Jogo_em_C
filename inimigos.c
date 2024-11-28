@@ -180,13 +180,12 @@ void destroi_lista_inimigos(lista_inimigo* lista) {
 
     free(lista);
 }
-/*
+
 void manipula_inimigos (inimigo *inim, unsigned short max_x, unsigned short max_y){
     unsigned char frame_atual, tempo_anim = 0; // Quadro atual, contador troca de quadro
     nodo_inimigo *ini_atual;
 
-
-    ALLEGRO_BITMAP *sp_1 = al_load_bitmap("./sprites/inimigo1.png");
+    ALLEGRO_BITMAP *sp_1 = al_load_bitmap("./sprites/explosao.png");
     ALLEGRO_BITMAP *sp_2 = al_load_bitmap("./sprites/shot2.png");
     ALLEGRO_BITMAP *sp_proj2 = al_load_bitmap("./sprites/inimigo1.png");
     ALLEGRO_BITMAP *sp_3 = al_load_bitmap("./sprites/shot2.png");
@@ -201,7 +200,7 @@ void manipula_inimigos (inimigo *inim, unsigned short max_x, unsigned short max_
 
     // Calcula a largura e altura de cada quadro da sprite
     unsigned short l_sp1 = al_get_bitmap_width(sp_1) / FRAMES_INIMIGO;
-    unsigned short a_sp2 = al_get_bitmap_height(sp_1);
+    unsigned short a_sp1 = al_get_bitmap_height(sp_1);
 
     //unsigned short largura_quadro_projetil = al_get_bitmap_width(sprites_projetil) / FRAMES_PROJETIL;
     //unsigned short altura_quadro_projetil = al_get_bitmap_height(sprites_projetil);
@@ -226,15 +225,15 @@ void manipula_inimigos (inimigo *inim, unsigned short max_x, unsigned short max_
 
         // Desenha o jogador
         al_draw_bitmap_region(
-            sprites_jogador,
-            frame_atual * largura_quadro_jogador, 0,
-            largura_quadro_jogador, altura_quadro_jogador,
-            jog->x - largura_quadro_jogador / 2, jog->y - altura_quadro_jogador / 2, 0
+            sp_1,
+            frame_atual * l_sp1, 0,
+            l_sp1, a_sp1,
+            ini_atual->chave_inimigo->x - l_sp1 / 2, ini_atual->chave_inimigo->y - a_sp1 / 2, 0
         );
 
-        mov_jogador(jog, 1, max_x, max_y);
+        mov_inimigo(ini_atual->chave_inimigo, 1, l_sp1, a_sp1, max_x, max_y);
 
         ini_atual = ini_atual->prox;
     }
 }
-*/
+

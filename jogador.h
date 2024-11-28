@@ -18,7 +18,7 @@ typedef struct {
     especial *especial; // Ataque especial
 } jogador;
 
-jogador* cria_jogador(unsigned char hp, unsigned char largura, unsigned char altura, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y);
+jogador* cria_jogador(unsigned char hp, unsigned short largura, unsigned short altura, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y);
 void mov_jogador(jogador* jog, char passos, unsigned short max_x, unsigned short max_y);
 void ataque_jogador(jogador *jog);
 void especial_jogador(jogador *jog);

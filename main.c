@@ -76,8 +76,8 @@ int main(){
     unsigned char chave_joystick[6] = {0,0,0,0,0,0};
     
     /* --------------------Criacao dos personagens -------------------------------------------- */
-
-    jogador* player = cria_jogador(10, 50, 50, 50, Y_TELA/2, X_TELA, Y_TELA);
+    
+    jogador* player = cria_jogador(10, 928, 106, 50, Y_TELA/2, X_TELA, Y_TELA);
     if (!player){
         fprintf(stderr, "Erro ao criar jogador");
         return 1;
