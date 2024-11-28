@@ -233,7 +233,7 @@ void manipula_inimigos (inimigo *inim, unsigned short max_x, unsigned short max_
 
         mov_inimigo(ini_atual->chave_inimigo, 1, l_sp1, a_sp1, max_x, max_y);
 
-        ini_atual = ini_atual->prox;
+        ini_atual = ini_atual->prox;  
     }
 }
 
