@@ -1,15 +1,15 @@
-// gcc main.c jogador.c joystick.c inimigos.c projeteis.c -o AS $(pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 allegro_image-5 --libs --cflags) -lm
+// gcc main.c fases.c jogador.c joystick.c inimigos.c projeteis.c -o AS $(pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 allegro_image-5 --libs --cflags) -lm
 
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_primitives.h> 
 #include <allegro5/allegro_image.h>
 
-
 #include "jogador.h"
 #include "inimigos.h"
 #include "joystick.h"
 #include "projeteis.h"
+#include "fases.h"
 
 #include <stdio.h>
 #include <time.h>
@@ -18,38 +18,6 @@
 
 #define X_TELA 1920
 #define Y_TELA 1080
-
-/* ------------------------------------- teste ----------------------------------- */
-void teste_gera_lista_inimigos() {
-    srand(time(NULL)); // Inicializa o gerador de números aleatórios
-
-    // Chamar a função para gerar a lista de inimigos
-    lista_inimigo* lista = gera_lista_inimigos(50, 50, X_TELA, Y_TELA);
-
-    if (!lista) {
-        fprintf(stderr, "Erro ao criar a lista de inimigos\n");
-        return;
-    }
-
-    // Iterar sobre a lista e imprimir os atributos de cada inimigo
-    nodo_inimigo* atual = lista->ini;
-    unsigned short contador = 1;
-
-    printf("Lista de Inimigos Gerada:\n");
-    while (atual != NULL) {
-        inimigo* inim = atual->chave_inimigo;
-        printf("Inimigo %d:\n", contador++);
-        printf("  Tipo: %d\n", inim->tipo);
-        printf("  HP: %d\n", inim->hp);
-        printf("  Largura: %d\n", inim->largura);
-        printf("  Altura: %d\n", inim->altura);
-        printf("  Dano: %d\n", inim->dano);
-        printf("  Posição (x, y): (%d, %d)\n", inim->x, inim->y);
-        atual = atual->prox;
-    }
-
-    // Liberar memória da lista após uso (não implementado aqui, mas recomendado)
-}
 
 int main(){ 
     al_init(); // Inicia biblioteca Allegro
@@ -74,7 +42,8 @@ int main(){
     /* -------------------------- Variaveis de controle  ------------------------ */
 
     unsigned char chave_joystick[6] = {0,0,0,0,0,0};
-    
+    unsigned char fase_atual = 1;
+
     /* --------------------Criacao dos personagens -------------------------------------------- */
     
     jogador* player = cria_jogador(10, 928, 106, 50, Y_TELA/2, X_TELA, Y_TELA);
@@ -83,23 +52,15 @@ int main(){
         return 1;
     }
     
-    
     /* --------------------------- Loop principal ------------------------------*/
 
     while (1) {
         al_wait_for_event(queue, &event); // Captura eventos da fila
         
-            if (event.type == ALLEGRO_EVENT_TIMER) {
-                manipula_jogador(player, X_TELA, Y_TELA);
+        if (event.type == ALLEGRO_EVENT_TIMER) {
+            fase1(timer, player, inimigos, tamanho, X_TELA, Y_TELA);
+        }
 
-                al_clear_to_color(al_map_rgb(0, 0, 0)); 
-
-                // Redesenha tudo antes do flip
-                manipula_jogador(player, X_TELA, Y_TELA);
-                al_flip_display();
-            }
-
-        
         else if (event.type == ALLEGRO_EVENT_KEY_DOWN){ // O botão foi pressionado
             switch (event.keyboard.keycode) {
                 case ALLEGRO_KEY_W:

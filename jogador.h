@@ -23,6 +23,7 @@ void mov_jogador(jogador* jog, char passos, unsigned short max_x, unsigned short
 void ataque_jogador(jogador *jog);
 void especial_jogador(jogador *jog);
 void destroi_jogador(jogador *jog);
-void manipula_jogador (jogador *jog, unsigned short max_x, unsigned short max_y);
+void desenha_jogador(jogador *jog);
+void desenha_projeteis_jog(jogador *jog, unsigned short max_x, unsigned short max_y);
 
 #endif																									

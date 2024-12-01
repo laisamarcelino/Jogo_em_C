@@ -31,8 +31,8 @@ void insere_bala(projetil_lista *lista, unsigned short x, unsigned short y, unsi
     if (!novo)
         return;
 
-    novo->x = x-50;
-    novo->y = y+25;
+    novo->x = x;
+    novo->y = y;
     novo->dano = dano;
     novo->prox = lista->inicio;
     lista->inicio = novo;

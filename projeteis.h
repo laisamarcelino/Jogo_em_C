@@ -1,7 +1,7 @@
 #ifndef __PROJETEIS__
 #define __PROJETEIS__ 
 
-#define VEL_BALA 6
+#define VEL_BALA 15
 #define TEMPO_POR_FRAME 15
 #define FRAMES_PROJETIL 3
 
