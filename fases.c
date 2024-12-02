@@ -7,53 +7,190 @@
 #include "fases.h"
 #include "inimigos.h"
 
-inimigo* cria_inimigos (unsigned short max_x, unsigned short max_y){
-    inimigo* inimigos[MAX_INIMIGOS];
-    tamanho *tamanho;
-    
-    tamanho = carrega_sprites();
+unsigned char verifica_colisao_players(jogador *player, inimigo *inimigo, unsigned short max_x){
 
-    // Cria lista de inimigos
-    for (unsigned char i = 0; i < MAX_INIMIGOS; i++) {
-        unsigned char tipo = aleat(1, 2); 
-        unsigned char hp = (tipo == 1) ? 3 : 2;
-        unsigned char dano = (tipo == 1) ? 0 : 2;
-        unsigned char largura = (tipo == 1) ? tamanho->l1 : tamanho->l2;
-        unsigned char altura = (tipo == 1) ? tamanho->a1 : tamanho->a2;
-        unsigned short x = max_x - 10; 
-        unsigned short y = aleat(altura / 2, max_y - altura / 2); 
+	if ((((inimigo->y-inimigo->altura/2 >= player->y-player->altura/2) && (player->y+player->altura/2 >= inimigo->y-inimigo->altura/2)) ||
+		((player->y-player->altura/2 >= inimigo->y-inimigo->altura/2) && (inimigo->y+inimigo->altura/2 >= player->y-player->altura/2))) && 
+		(((inimigo->x-inimigo->largura/2 >= player->x-player->largura/2) && (player->x+player->largura/2 >= inimigo->x-inimigo->largura/2)) ||
+		((player->x-player->largura/2 >= inimigo->x-inimigo->largura/2) && (inimigo->x+inimigo->largura/2 >= player->x-player->largura/2)))){
+            player->hp--;
+            inimigo->hp = 0;
+            //inimigo->x = max_x + inimigo->largura / 2; // Remove inimigo da tela
 
-        inimigos[i] = cria_inimigo(tipo, hp, largura, altura, dano, x, y, max_x, max_y);
-        if (!inimigos[i]) {
-            fprintf(stderr, "Erro ao criar inimigo %d\n", i);
-            return;
-        }
-    }                                                      
-    
-    return *inimigos;
+            return 1;
+        } 
+       
+    return 0;
 }
 
-void fase1 (ALLEGRO_TIMER* timer, jogador* player, inimigo* inimigos[], tamanho *tamanho, unsigned short max_x, unsigned short max_y) {
-    static int ultimo_tempo = 0; // Armazena o último tempo processado
-    int tempo = (int)(al_get_timer_count(timer) / 30.0);
+unsigned char colisao_projeteis(nodo_bala *projetil, jogador *player, inimigo *inimigo) {
     
-    if (tempo > 0 && tempo <= 10){
-        mov_inimigo(inimigos[0], 1, inimigos[0]->largura, inimigos[0]->altura, max_x, max_y);
-        printf("tempo 10\n");     
-        desenha_inimigo(tamanho->inimigo1, inimigos[0], inimigos[0]->largura, inimigos[0]->altura);
- 
+    if (inimigo != NULL){
+        return (
+            projetil->x >= inimigo->x - inimigo->largura / 2 &&
+            projetil->x <= inimigo->x + inimigo->largura / 2 &&
+            projetil->y >= inimigo->y - inimigo->altura / 2 &&
+            projetil->y <= inimigo->y + inimigo->altura / 2
+        );
     }
 
+    return (
+            projetil->x >= player->x - player->largura / 2 &&
+            projetil->x <= player->x + player->largura / 2 &&
+            projetil->y >= player->y - player->altura / 2 &&
+            projetil->y <= player->y + player->altura / 2
+        );
+}
+
+unsigned char verifica_colisao_projeteis(jogador *player, inimigo *inimigo, unsigned short max_x) {
+    nodo_bala *atual_proj;
+
+    // Verifica projéteis do jogador atingindo o inimigo
+    atual_proj = player->projeteis->inicio;
+    nodo_bala *anterior_proj = NULL;
+
+    while (atual_proj) {
+        if (colisao_projeteis(atual_proj, NULL, inimigo)) {
+            inimigo->hp--;
+            
+            // Remove o projétil da lista
+            if (!anterior_proj) 
+                player->projeteis->inicio = atual_proj->prox;
+            else 
+                anterior_proj->prox = atual_proj->prox;
+            
+            nodo_bala *remover = atual_proj;
+            atual_proj = atual_proj->prox;
+            free(remover);
+            return 1; // O inimigo foi atingido
+        } 
+        else {
+            anterior_proj = atual_proj;
+            atual_proj = atual_proj->prox;
+        }
+    }
+
+    // Verifica projéteis dos inimigos atingindo o jogador
+    if (inimigo) {
+        atual_proj = inimigo->projeteis->inicio;
+        anterior_proj = NULL;
+
+        while (atual_proj) {
+            if (colisao_projeteis(atual_proj, player, NULL)) {
+                player->hp--;
+                // Remove o projétil da lista
+                if (!anterior_proj) 
+                    inimigo->projeteis->inicio = atual_proj->prox;
+                else 
+                    anterior_proj->prox = atual_proj->prox;
+                
+                nodo_bala *remover = atual_proj;
+                atual_proj = atual_proj->prox;
+                free(remover);
+                return 2; // O jogador foi atingido
+            } 
+            else {
+                anterior_proj = atual_proj;
+                atual_proj = atual_proj->prox;
+            }
+        }
+    }
+
+    return 0;
+}
+
+ALLEGRO_BITMAP* get_sprite(unsigned char tipo, infos_inimigos* infos_inimigos){
+    switch(tipo){
+        case 1:
+            return infos_inimigos->inimigo1;
+        case 2:
+            return infos_inimigos->inimigo2;
+        case 3:
+            return infos_inimigos->inimigo3;
+        case 4:
+            return infos_inimigos->inimigo4;
+        default:
+            return NULL;
+    }
+}
+
+void fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], infos_inimigos *infos_inimigos, unsigned short max_x, unsigned short max_y){
+    static unsigned int frame_count = 0;
+    frame_count++;
+
+    // A cada 300 frames (10 segundos)
+    if (frame_count % 300 == 0){
+        // Cria 3 inimigos por vez
+        for (int i = 0; i < 3; i++){
+            // Encontrar um slot livre no array inimigos[]
+            int index = -1;
+            for (int j = 0; j < MAX_INIMIGOS; j++){
+                if (inimigos[j] == NULL){
+                    index = j;
+                    break;
+                }
+            }
+            if (index != -1){
+                unsigned char tipo = aleat(1, 2); 
+                unsigned char hp, dano;
+                unsigned char largura, altura;
+
+                switch(tipo) {
+                    case 1:
+                        hp = 3;
+                        dano = 1;
+                        largura = infos_inimigos->l1;
+                        altura = infos_inimigos->a1;
+                        break;
+                    case 2:
+                        hp = 2;
+                        dano = 2;
+                        largura = infos_inimigos->l2;
+                        altura = infos_inimigos->a2;
+                        break;
+                    default:
+                        continue; // Tipo inválido, pular para o próximo loop
+                }
+
+                unsigned short x = max_x + largura / 2;
+                unsigned short y = aleat(altura / 2, max_y - altura / 2);
+                inimigos[index] = cria_inimigo(tipo, hp, largura, altura, dano, x, y, max_x, max_y);
+            }
+        }
+    }
+    
     mov_jogador(player, 1, max_x, max_y);
-
-    al_clear_to_color(al_map_rgb(0, 0, 0)); // Limpar tela
-
+    al_clear_to_color(al_map_rgb(0, 0, 0)); 
     desenha_projeteis_jog(player, max_x, max_y);
     desenha_jogador(player);
 
+    for (int i = 0; i < MAX_INIMIGOS; i++){
+        if (inimigos[i] != NULL){
+            mov_inimigo(inimigos[i], 1, inimigos[i]->largura, inimigos[i]->altura, max_x, max_y);
+
+            unsigned char c_players = verifica_colisao_players(player, inimigos[i], max_x);
+
+            if (inimigos[i]->tipo == 1){
+                unsigned char c_projeteis = verifica_colisao_projeteis(player, inimigos[i], max_x);
+                desenha_projeteis_inimigo(inimigos[i], max_x, max_y, infos_inimigos);
+            }
+
+            if (inimigos[i]->hp > 0){
+                ALLEGRO_BITMAP *sprite = get_sprite(inimigos[i]->tipo, infos_inimigos);
+                if (sprite){
+                    desenha_inimigo(sprite, inimigos[i], inimigos[i]->largura, inimigos[i]->altura);
+                }
+            }
+
+            if (inimigos[i]->x + inimigos[i]->largura / 2 < 0){
+                destroi_inimigo(inimigos[i]);
+                inimigos[i] = NULL;
+            }
+        }
+    }
+
     al_flip_display();
 }
-
 
 /*
 void fase2 (ALLEGRO_TIMER* timer, jogador* player, unsigned short max_x, unsigned short max_y) {

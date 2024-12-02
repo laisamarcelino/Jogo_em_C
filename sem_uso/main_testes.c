@@ -25,7 +25,8 @@ unsigned char colisao(jogador *jogador, inimigo *inimigo){
 		((jogador->x-jogador->largura/2 >= inimigo->x-inimigo->largura/2) && (inimigo->x+inimigo->largura/2 >= jogador->x-jogador->largura/2)))) return 1;
 	else return 0;
 
-}unsigned char colisao_projeteis(nodo_bala *projetil, inimigo *inimigo) {
+}
+unsigned char colisao_projeteis(nodo_bala *projetil, inimigo *inimigo) {
     return (
         projetil->x >= inimigo->x - inimigo->largura / 2 &&
         projetil->x <= inimigo->x + inimigo->largura / 2 &&

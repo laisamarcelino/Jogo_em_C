@@ -2,7 +2,7 @@
 #define __PROJETEIS__ 
 
 #define VEL_BALA 15
-#define TEMPO_POR_FRAME 15
+#define TEMPO_POR_FRAME 6
 #define FRAMES_PROJETIL 3
 
 typedef struct nodo_bala {

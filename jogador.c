@@ -43,12 +43,25 @@ void mov_jogador(jogador* jog, char passos, unsigned short max_x, unsigned short
 void ataque_jogador(jogador *jog) {
     unsigned short x_tiro = jog->x + jog->largura / 2; // Inicia na frente do jogador
     unsigned short y_tiro = jog->y; // Na mesma altura do jogador
-    unsigned char dano = 1;
+    unsigned char dano;
+
+    switch (jog->tipo_ataque){
+    case 1:
+        dano = 1;
+        break;
+    case 2:
+        dano = 2;
+        break;
+    case 3:
+        dano = 3;
+        break;
+    
+    default:
+        break;
+    }
 
     insere_bala(jog->projeteis, x_tiro-150, y_tiro+20, dano);
 }
-
-void especial_jogador(jogador *jog);
 
 void destroi_jogador(jogador *jog){
     destroi_projetil_lista(&(jog->projeteis));
