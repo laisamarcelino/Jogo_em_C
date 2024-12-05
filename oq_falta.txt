@@ -1,0 +1,5 @@
+- [ ]  Implementar especiais do jogador
+- [ ]  Implementar objeto que deve aparecer no tempo x do jogo para que o jogador adquira o ataque especial
+- [ ]  Implementar boss
+- [ ]  Fazer fase 2
+- [ ]  Fazer historia inicial
