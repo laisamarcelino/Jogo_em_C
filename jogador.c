@@ -16,11 +16,12 @@ jogador* cria_jogador(unsigned char hp, unsigned short largura, unsigned short a
     novo_jogador->hp = hp;
     novo_jogador->largura = largura;
     novo_jogador->altura = altura;
+    novo_jogador->tipo_ataque = 0;
     novo_jogador->x = x;
     novo_jogador->y = y;
     novo_jogador->controle = cria_joystick();
     novo_jogador->projeteis = cria_projetil_lista(); 
-    //novo_jogador->especial = cria_especial();
+    
 
     return novo_jogador;
 }
@@ -43,25 +44,23 @@ void mov_jogador(jogador* jog, char passos, unsigned short max_x, unsigned short
 void ataque_jogador(jogador *jog) {
     unsigned short x_tiro = jog->x + jog->largura / 2; // Inicia na frente do jogador
     unsigned short y_tiro = jog->y; // Na mesma altura do jogador
-    unsigned char dano = 1;
+    unsigned char dano;
 
     switch (jog->tipo_ataque){
-    case 1:
-        dano = 1;
-        break;
-    case 2:
-        dano = 2;
-        break;
-    case 3:
-        dano = 3;
-        break;
-    
-    default:
-        dano = 1;
-        break;
-    }
-
-    insere_bala(jog->projeteis, x_tiro-150, y_tiro+20, dano);
+        case 0: // Ataque padrão
+            dano = 1; 
+            break;
+        case 1: // Especial 1
+            dano = 3; 
+            break;
+        case 2: // Especial 2
+            dano = 5;
+            break;
+        default:
+            dano = 1;
+            break;
+        }
+    insere_bala(jog->projeteis, x_tiro-50, y_tiro+20, dano);
 }
 
 void destroi_jogador(jogador *jog){
@@ -115,22 +114,63 @@ void desenha_jogador(jogador *jog) {
 }
 
 void desenha_projeteis_jog(jogador *jog, unsigned short max_x, unsigned short max_y) {
-    ALLEGRO_BITMAP *sprites_projetil = al_load_bitmap("./sprites/shot_jogador.png");
+    ALLEGRO_BITMAP *sp_p = al_load_bitmap("./sprites/shot_jogador.png");
+    ALLEGRO_BITMAP *sp_e1 = al_load_bitmap("./sprites/projetil_boss1.png");
+    ALLEGRO_BITMAP *sp_e2 = al_load_bitmap("./sprites/projetil_boss2.png");
 
-    if (!sprites_projetil) {
+    if (!sp_p || !sp_e1 || !sp_e2) {
         fprintf(stderr, "Erro ao carregar sprites dos projeteis do jogador.\n");
         return;
     }
 
-    unsigned short largura_quadro_projetil = al_get_bitmap_width(sprites_projetil) / FRAMES_PROJETIL;
-    unsigned short altura_quadro_projetil = al_get_bitmap_height(sprites_projetil);
-
+    unsigned short l_p = al_get_bitmap_width(sp_p) / FRAMES_PROJETIL;
+    unsigned short a_p = al_get_bitmap_height(sp_p);
+    unsigned short l_e1 = al_get_bitmap_width(sp_e1) / FRAMES_PROJETIL;
+    unsigned short a_e1 = al_get_bitmap_height(sp_e1);
+    unsigned short l_e2 = al_get_bitmap_width(sp_e2) / FRAMES_PROJETIL;
+    unsigned short a_e2 = al_get_bitmap_height(sp_e2);
+   
     atualiza_projetil(jog->projeteis, 1, max_x, max_y);
 
     // Desenha os projéteis com animação
     nodo_bala *atual = jog->projeteis->inicio;
+    
     while (atual) {
-        al_draw_bitmap_region(sprites_projetil,atual->frame * largura_quadro_projetil, 0,largura_quadro_projetil, altura_quadro_projetil,atual->x - largura_quadro_projetil / 2, atual->y - altura_quadro_projetil / 2, 0);
+        switch (jog->tipo_ataque) {
+        case 0:
+            al_draw_bitmap_region(sp_p, atual->frame * l_p, 0, l_p, a_p,atual->x - l_p / 2, atual->y - a_p / 2, 0);
+            break;
+        case 1:
+            al_draw_bitmap_region(sp_e1, atual->frame * l_e1, 0, l_p, a_e1,atual->x - l_e1 / 2, atual->y - a_e1 / 2, 0);
+            break;
+        case 2:
+            al_draw_bitmap_region(sp_e2, atual->frame * l_e2, 0, l_e2, a_p,atual->x - l_e2 / 2, atual->y - a_e2 / 2, 0);
+            break;
+        
+        default:
+            al_draw_bitmap_region(sp_p,atual->frame * l_p, 0, l_p, a_p,atual->x - l_p / 2, atual->y - a_p / 2, 0);
+            break; 
+        }
+
         atual = atual->prox;
     }
+}
+
+void desenha_icone_especial(especial_jog *especial){
+    ALLEGRO_BITMAP *especial1 = al_load_bitmap("./sprites/especial1.png");
+    ALLEGRO_BITMAP *especial2 = al_load_bitmap("./sprites/especial2.png");
+
+    if (!especial1 || !especial2) {
+        fprintf(stderr, "Erro ao carregar sprites de especial.\n");
+        return;
+    }
+
+    unsigned short l1 = al_get_bitmap_width(especial1) / 8;
+    unsigned short a1 = al_get_bitmap_height(especial1);
+    unsigned short l2 = al_get_bitmap_width(especial2) / 8;
+    unsigned short a2 = al_get_bitmap_height(especial2);
+    
+    // PAREI AQUI
+    al_draw_bitmap_region(sp_p, atual->frame * l_p, 0, l_p, a_p,atual->x - l_p / 2, atual->y - a_p / 2, 0);
+
 }

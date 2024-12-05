@@ -189,14 +189,14 @@ void fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], infos_ini
 
                 switch(tipo) {
                     case 1:
-                        hp = 3;
-                        dano = 1;
+                        hp = 2;
+                        dano = 1; //dano ao encostar no personagem
                         largura = infos_inimigos->l1;
                         altura = infos_inimigos->a1;
                         break;
                     case 2:
-                        hp = 2;
-                        dano = 2;
+                        hp = 3;
+                        dano = 1; 
                         largura = infos_inimigos->l2;
                         altura = infos_inimigos->a2;
                         break;
@@ -207,9 +207,13 @@ void fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], infos_ini
                 unsigned short x = max_x + largura / 2;
                 unsigned short y = aleat(altura / 2, max_y - altura / 2);
                 inimigos[index] = cria_inimigo(tipo, hp, largura, altura, dano, x, y, max_x, max_y);
-                printf("Inimigo criado: Tipo %u, HP %u, Dano %u, Posição (%u, %u)\n", tipo, hp, dano, x, y);
+                printf("Inimigo criado: Tipo %u, HP %u, Dano %u, Posição (%u, %u)\n", tipo, hp, dano, x, y); // DEBUG
             }
         }
+    }
+
+    if (frame_count == 600) {
+        //desenha_especial_jog();
     }
 
     // Atualizar o jogador
@@ -218,12 +222,13 @@ void fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], infos_ini
     // Limpar a tela antes de desenhar
     al_clear_to_color(al_map_rgb(0, 0, 0));
 
-    // Desenhar projéteis do jogador
-    desenha_projeteis_jog(player, max_x, max_y);
-
     // Desenhar o jogador
     desenha_jogador(player);
 
+    // Desenhar projéteis do jogador
+    desenha_projeteis_jog(player, max_x, max_y);
+
+    
     // Iterar sobre todos os inimigos
     for (int i = 0; i < MAX_INIMIGOS; i++){
         if (inimigos[i] != NULL){

@@ -21,9 +21,9 @@
 #define X_TELA 1280
 #define Y_TELA 720
 #define FRAME_RATE 30.0
-#define MAX_INIMIGOS 100 // Defina conforme necessário
+#define MAX_INIMIGOS 100
 
-void liberamem(ALLEGRO_TIMER* timer, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_FONT* font, ALLEGRO_DISPLAY* disp, jogador* player, inimigo* inimigos[], infos_inimigos* infos_inimigos) {
+void libera_mem(ALLEGRO_TIMER* timer, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_FONT* font, ALLEGRO_DISPLAY* disp, jogador* player, inimigo* inimigos[], infos_inimigos* infos_inimigos) {
     if (player) destroi_jogador(player);
 
     for (int i = 0; i < MAX_INIMIGOS; i++) {
@@ -133,25 +133,28 @@ int main(){
     unsigned char fase_atual = 1;
     unsigned int frame_count = 0;
     inimigo* inimigos[MAX_INIMIGOS] = {NULL};
+    bool running = true;
+    bool ativa_especial = false;
+    bool ativa_projetil = true;
 
     /* -------------------- Criação dos Personagens -------------------- */
 
     jogador* player = cria_jogador(20, 928, 106, 50, Y_TELA/2, X_TELA, Y_TELA);
     if (!player){
         fprintf(stderr, "Erro ao criar jogador.\n");
-        liberamem(timer, queue, font, disp, NULL, inimigos, NULL);
+        libera_mem(timer, queue, font, disp, NULL, inimigos, NULL);
         return -1;
     }
 
     infos_inimigos *infos_inimigos = carrega_sprites();
     if (infos_inimigos == NULL){
         fprintf(stderr, "Erro ao carregar sprites.\n");
-        liberamem(timer, queue, font, disp, player, inimigos, infos_inimigos);
+        libera_mem(timer, queue, font, disp, player, inimigos, infos_inimigos);
         return -1;
     }
 
     /* -------------------- Loop Principal --------------------*/
-    bool running = true;
+    
     while (running) {
         al_wait_for_event(queue, &event);
 
@@ -159,7 +162,7 @@ int main(){
             if (player->hp > 0){
                 fase1(timer, player, inimigos, infos_inimigos, X_TELA, Y_TELA);
                 // Remover ou substituir o printf em produção
-                printf("HP do Jogador: %u\n", player->hp);
+                printf("HP do Jogador: %u\n", player->hp); //DEBUG
             }
             else {
                 // O jogador morreu; encerrar o loop principal
@@ -184,10 +187,18 @@ int main(){
                     break;
                 case ALLEGRO_KEY_E:
                     chave_joystick[4] = 1;
-                    ataque_jogador(player);
+                    if (ativa_projetil) {
+                        ataque_jogador(player);
+                        ativa_especial = false;
+                    }
                     break;
                 case ALLEGRO_KEY_X:
                     chave_joystick[5] = 1;
+                    if (ativa_especial){
+                        player->tipo_ataque = 1; // Restaurar o tipo de ataque em fases.c com base na duração do ataque
+                        ataque_jogador(player);
+                        ativa_projetil = false;
+                    } 
                     break;
                 default:
                     break;
@@ -221,14 +232,13 @@ int main(){
             atualiza_joystick(player->controle, chave_joystick);
         }
 
-        else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE ||
-                 (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)) {
+        else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE || event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
             running = false;
         }
 
     }
 
     // Após o loop, realizar a limpeza e encerrar o programa
-    liberamem(timer, queue, font, disp, player, inimigos, infos_inimigos);
+    libera_mem(timer, queue, font, disp, player, inimigos, infos_inimigos);
     return 0;
 }

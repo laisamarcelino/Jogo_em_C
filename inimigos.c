@@ -80,7 +80,7 @@ void ataque_inimigo(inimigo *inimigo){
     unsigned short y_tiro = inimigo->y; // Na mesma altura do inimigo
     
     switch (inimigo->tipo) {
-        case 2:
+        case 1:
             dano = 1;
             break;
         case 3:
@@ -89,8 +89,11 @@ void ataque_inimigo(inimigo *inimigo){
         case 4:
             dano = 3;
             break;
-        case 5:
-            dano = 3;
+        case 5: //boss 1
+            dano = 5;
+            break;
+        case 6: //boss 2
+            dano = 10;
             break;
         
         default:
