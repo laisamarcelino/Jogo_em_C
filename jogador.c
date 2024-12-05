@@ -43,7 +43,7 @@ void mov_jogador(jogador* jog, char passos, unsigned short max_x, unsigned short
 void ataque_jogador(jogador *jog) {
     unsigned short x_tiro = jog->x + jog->largura / 2; // Inicia na frente do jogador
     unsigned short y_tiro = jog->y; // Na mesma altura do jogador
-    unsigned char dano;
+    unsigned char dano = 1;
 
     switch (jog->tipo_ataque){
     case 1:
@@ -57,6 +57,7 @@ void ataque_jogador(jogador *jog) {
         break;
     
     default:
+        dano = 1;
         break;
     }
 

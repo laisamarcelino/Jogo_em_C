@@ -68,7 +68,7 @@ int main(){
     /* hp
     jogador -> hp 20 / dano 1 / especial1 2 / especial2 3
     inimigo1 -> hp 3 / dano 2
-    inimigo2 -> hp 2 
+    inimigo2 -> hp 2 / sem dano por tiro
     inimigo3 -> hp 4 / dano 3
     inimigo4 -> hp 3 / dano 4
     boss1 -> hp -> hp 30 / dano 5 / especial 10
@@ -84,11 +84,11 @@ int main(){
         if (event.type == ALLEGRO_EVENT_TIMER) {
             if (player->hp >= 0){
                 fase1(timer, player, inimigos, infos_inimigos, X_TELA, Y_TELA);
+                printf("%u\n", player->hp);
             }
-            if (player->hp < 0) {
-                al_clear_to_color(al_map_rgb(0, 0, 0)); 
-                printf("perdeu");
-                break;
+            else {
+                al_clear_to_color(al_map_rgb(0, 0, 0));
+                al_flip_display();
             }
                 
         }
@@ -157,7 +157,7 @@ int main(){
 	al_destroy_timer(timer);
 	al_destroy_event_queue(queue);
 
-    // Free enemies
+    // Destroi inimigos
     for (int i = 0; i < MAX_INIMIGOS; i++) {
         if (inimigos[i] != NULL) {
             destroi_inimigo(inimigos[i]);

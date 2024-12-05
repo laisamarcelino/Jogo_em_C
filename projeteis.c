@@ -33,11 +33,14 @@ void insere_bala(projetil_lista *lista, unsigned short x, unsigned short y, unsi
 
     novo->x = x;
     novo->y = y;
-    novo->dano = dano;
+    novo->dano = dano; 
+    novo->frame = 0;   // Inicializa o frame de animação
+    novo->tempo_anim = 0; // Inicializa o tempo de animação
     novo->prox = lista->inicio;
     lista->inicio = novo;
-    (lista->tamanho)++; 
+    (lista->tamanho)++;
 }
+
 void lista_remove_inicio(projetil_lista *lista){
     nodo_bala *aux;
 

@@ -71,16 +71,10 @@ void mov_inimigo(inimigo* inimigo, char passos, unsigned char largura, unsigned 
         default:
             break;
     }
-
-    // Verifica se o inimigo saiu da tela 
-    if (inimigo->x - largura / 2 < 0) {
-        inimigo->x = max_x + largura / 2;
-        inimigo->y = aleat(largura / 2, max_y - largura / 2);
-    }
 }
 
 void ataque_inimigo(inimigo *inimigo){
-    unsigned char dano;
+    unsigned char dano = 1; // Dano do projétil
 
     unsigned short x_tiro = inimigo->x - inimigo->largura / 2; // Inicia na frente do inimigo
     unsigned short y_tiro = inimigo->y; // Na mesma altura do inimigo
@@ -100,6 +94,7 @@ void ataque_inimigo(inimigo *inimigo){
             break;
         
         default:
+            dano = 1;
             break;
     }
 
@@ -112,6 +107,7 @@ void destroi_inimigo(inimigo *inimigo){
     destroi_projetil_lista(&(inimigo->projeteis));
     free(inimigo);  
 }
+
 
 void desenha_inimigo(ALLEGRO_BITMAP *sprite, inimigo *inimigo, unsigned short largura, unsigned short altura) {
     if (!sprite) {
