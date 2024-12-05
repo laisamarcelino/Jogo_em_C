@@ -2,7 +2,7 @@
 
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
-#include <allegro5/allegro_primitives.h> 
+#include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_image.h>
 
 #include "jogador.h"
@@ -13,86 +13,161 @@
 
 #include <stdio.h>
 #include <time.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <stdbool.h>
 
-#define X_TELA 1920
-#define Y_TELA 1080
+/*#define X_TELA 1920
+#define Y_TELA 1080*/
+#define X_TELA 1280
+#define Y_TELA 720
+#define FRAME_RATE 30.0
+#define MAX_INIMIGOS 100 // Defina conforme necessário
 
-int main(){ 
-    al_init(); // Inicia biblioteca Allegro
+void liberamem(ALLEGRO_TIMER* timer, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_FONT* font, ALLEGRO_DISPLAY* disp, jogador* player, inimigo* inimigos[], infos_inimigos* infos_inimigos) {
+    if (player) destroi_jogador(player);
+
+    for (int i = 0; i < MAX_INIMIGOS; i++) {
+        if (inimigos[i] != NULL) {
+            destroi_inimigo(inimigos[i]);
+        }
+    }
+
+    if (infos_inimigos) {
+        if (infos_inimigos->inimigo1) al_destroy_bitmap(infos_inimigos->inimigo1);
+        if (infos_inimigos->inimigo2) al_destroy_bitmap(infos_inimigos->inimigo2);
+        if (infos_inimigos->inimigo3) al_destroy_bitmap(infos_inimigos->inimigo3);
+        if (infos_inimigos->inimigo4) al_destroy_bitmap(infos_inimigos->inimigo4);
+        free(infos_inimigos);
+    }
+
+    if (font) al_destroy_font(font);
+    if (disp) al_destroy_display(disp);
+    if (timer) al_destroy_timer(timer);
+    if (queue) al_destroy_event_queue(queue);
+
+    al_shutdown_primitives_addon();
+    al_uninstall_keyboard();
+    al_shutdown_image_addon();
+}
+
+int main(){
     if (!al_init()) {
         fprintf(stderr, "Falha ao inicializar Allegro.\n");
         return -1;
     }
-    
-    al_init_primitives_addon(); // Inicializa imagens basicas
-    al_install_keyboard(); // Habilita entrada via teclado
+
+    if (!al_init_primitives_addon()) {
+        fprintf(stderr, "Falha ao inicializar Primitives Addon.\n");
+        al_shutdown_primitives_addon();
+        return -1;
+    }
+
+    if (!al_install_keyboard()) {
+        fprintf(stderr, "Falha ao instalar o teclado.\n");
+        al_shutdown_primitives_addon();
+        return -1;
+    }
+
+    if (!al_init_image_addon()) {
+        fprintf(stderr, "Falha ao inicializar Image Addon.\n");
+        al_uninstall_keyboard();
+        al_shutdown_primitives_addon();
+        return -1;
+    }
+
     srand(time(NULL));
     al_set_new_display_flags(ALLEGRO_OPENGL);
-    al_init_image_addon();
 
-    ALLEGRO_TIMER* timer = al_create_timer(1.0 / 30.0); // Cria o relogio do jogo
-	ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue(); // Cria a fila de eventos
-	ALLEGRO_FONT* font = al_create_builtin_font(); // Carrega uma fonte padrao para escrever na tela 
-	ALLEGRO_DISPLAY* disp = al_create_display(X_TELA, Y_TELA); // Cria uma janela para o programa
+    ALLEGRO_TIMER* timer = al_create_timer(1.0 / FRAME_RATE);
+    if (!timer) {
+        fprintf(stderr, "Falha ao criar timer.\n");
+        al_shutdown_image_addon();
+        al_uninstall_keyboard();
+        al_shutdown_primitives_addon();
+        return -1;
+    }
 
-	al_register_event_source(queue, al_get_keyboard_event_source()); // Insere  eventos de teclado na fila de eventos
-	al_register_event_source(queue, al_get_display_event_source(disp)); // Insere eventos de tela na fila de eventos
-	al_register_event_source(queue, al_get_timer_event_source(timer)); // Insere eventos de relogio na fila de eventos
+    ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
+    if (!queue) {
+        fprintf(stderr, "Falha ao criar fila de eventos.\n");
+        al_destroy_timer(timer);
+        al_shutdown_image_addon();
+        al_uninstall_keyboard();
+        al_shutdown_primitives_addon();
+        return -1;
+    }
 
-    ALLEGRO_EVENT event; // Guarda o evento capturado
-    al_start_timer(timer); // Inicializa o relogio do programa
+    ALLEGRO_FONT* font = al_create_builtin_font();
+    if (!font) {
+        fprintf(stderr, "Falha ao criar fonte.\n");
+        al_destroy_event_queue(queue);
+        al_destroy_timer(timer);
+        al_shutdown_image_addon();
+        al_uninstall_keyboard();
+        al_shutdown_primitives_addon();
+        return -1;
+    }
 
-    /* -------------------------- Variaveis de controle  ------------------------ */
+    ALLEGRO_DISPLAY* disp = al_create_display(X_TELA, Y_TELA);
+    if (!disp) {
+        fprintf(stderr, "Falha ao criar display.\n");
+        al_destroy_font(font);
+        al_destroy_event_queue(queue);
+        al_destroy_timer(timer);
+        al_shutdown_image_addon();
+        al_uninstall_keyboard();
+        al_shutdown_primitives_addon();
+        return -1;
+    }
+
+    al_register_event_source(queue, al_get_keyboard_event_source());
+    al_register_event_source(queue, al_get_display_event_source(disp));
+    al_register_event_source(queue, al_get_timer_event_source(timer));
+
+    ALLEGRO_EVENT event;
+    al_start_timer(timer);
+
+    /* -------------------- Variáveis de Controle -------------------- */
 
     unsigned char chave_joystick[6] = {0};
     unsigned char fase_atual = 1;
     unsigned int frame_count = 0;
     inimigo* inimigos[MAX_INIMIGOS] = {NULL};
 
-    /* --------------------Criacao dos personagens -------------------------------------------- */
-    
+    /* -------------------- Criação dos Personagens -------------------- */
+
     jogador* player = cria_jogador(20, 928, 106, 50, Y_TELA/2, X_TELA, Y_TELA);
     if (!player){
-        fprintf(stderr, "Erro ao criar jogador");
-        return 1;
+        fprintf(stderr, "Erro ao criar jogador.\n");
+        liberamem(timer, queue, font, disp, NULL, inimigos, NULL);
+        return -1;
     }
 
     infos_inimigos *infos_inimigos = carrega_sprites();
     if (infos_inimigos == NULL){
         fprintf(stderr, "Erro ao carregar sprites.\n");
-        return 1;
+        liberamem(timer, queue, font, disp, player, inimigos, infos_inimigos);
+        return -1;
     }
 
-    /* hp
-    jogador -> hp 20 / dano 1 / especial1 2 / especial2 3
-    inimigo1 -> hp 3 / dano 2
-    inimigo2 -> hp 2 / sem dano por tiro
-    inimigo3 -> hp 4 / dano 3
-    inimigo4 -> hp 3 / dano 4
-    boss1 -> hp -> hp 30 / dano 5 / especial 10
-    boss2 -> hp -> hp 40 / dano 5 / especial 10 
-    
-    */
-    
-    /* --------------------------- Loop principal ------------------------------*/
+    /* -------------------- Loop Principal --------------------*/
+    bool running = true;
+    while (running) {
+        al_wait_for_event(queue, &event);
 
-    while (1) {
-        al_wait_for_event(queue, &event); // Captura eventos da fila
-        
         if (event.type == ALLEGRO_EVENT_TIMER) {
-            if (player->hp >= 0){
+            if (player->hp > 0){
                 fase1(timer, player, inimigos, infos_inimigos, X_TELA, Y_TELA);
-                printf("%u\n", player->hp);
+                // Remover ou substituir o printf em produção
+                printf("HP do Jogador: %u\n", player->hp);
             }
             else {
-                al_clear_to_color(al_map_rgb(0, 0, 0));
-                al_flip_display();
+                // O jogador morreu; encerrar o loop principal
+                printf("Jogador morreu. Encerrando o jogo.\n");
+                running = false;
             }
-                
-        }
 
+        }
         else if (event.type == ALLEGRO_EVENT_KEY_DOWN){ // O botão foi pressionado
             switch (event.keyboard.keycode) {
                 case ALLEGRO_KEY_W:
@@ -146,34 +221,14 @@ int main(){
             atualiza_joystick(player->controle, chave_joystick);
         }
 
-        else if (event.type == 42 || event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) // Clique no X da tela ou esc para sair do programa
-            break;
-        
-    }
-    
-    destroi_jogador(player);
-    al_destroy_font(font);
-	al_destroy_display(disp);
-	al_destroy_timer(timer);
-	al_destroy_event_queue(queue);
-
-    // Destroi inimigos
-    for (int i = 0; i < MAX_INIMIGOS; i++) {
-        if (inimigos[i] != NULL) {
-            destroi_inimigo(inimigos[i]);
-            inimigos[i] = NULL;
+        else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE ||
+                 (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)) {
+            running = false;
         }
+
     }
 
-    // Destroy loaded bitmaps
-    if (infos_inimigos->inimigo1) al_destroy_bitmap(infos_inimigos->inimigo1);
-    if (infos_inimigos->inimigo2) al_destroy_bitmap(infos_inimigos->inimigo2);
-    if (infos_inimigos->inimigo3) al_destroy_bitmap(infos_inimigos->inimigo3);
-    if (infos_inimigos->inimigo4) al_destroy_bitmap(infos_inimigos->inimigo4);
-
-    // Free the infos_inimigos structure
-    free(infos_inimigos);
-
-
+    // Após o loop, realizar a limpeza e encerrar o programa
+    liberamem(timer, queue, font, disp, player, inimigos, infos_inimigos);
     return 0;
 }
