@@ -7,41 +7,77 @@
 #include "fases.h"
 #include "inimigos.h"
 
+// Função para verificar colisão entre retângulos
+unsigned char verifica_colisao(jogador *player, inimigo *inimigo) {
+    // Calcula os limites dos retângulos
+    int player_left = player->x - player->largura / 2;
+    int player_right = player->x + player->largura / 2;
+    int player_top = player->y - player->altura / 2;
+    int player_bottom = player->y + player->altura / 2;
+
+    int inimigo_left = inimigo->x - inimigo->largura / 2;
+    int inimigo_right = inimigo->x + inimigo->largura / 2;
+    int inimigo_top = inimigo->y - inimigo->altura / 2;
+    int inimigo_bottom = inimigo->y + inimigo->altura / 2;
+
+    // Verifica sobreposição
+    if (player_right < inimigo_left || player_left > inimigo_right ||
+        player_bottom < inimigo_top || player_top > inimigo_bottom) {
+        return 0; // Sem colisão
+    }
+    return 1; // Colisão detectada
+}
+
+// Função para verificar colisão de projéteis
+unsigned char colisao_projeteis(nodo_bala *projetil, jogador *player, inimigo *inimigo) {
+    if (inimigo != NULL) {
+        // Colisão com inimigo
+        int proj_x = projetil->x;
+        int proj_y = projetil->y;
+
+        int inimigo_left = inimigo->x - inimigo->largura / 2;
+        int inimigo_right = inimigo->x + inimigo->largura / 2;
+        int inimigo_top = inimigo->y - inimigo->altura / 2;
+        int inimigo_bottom = inimigo->y + inimigo->altura / 2;
+
+        if (proj_x >= inimigo_left && proj_x <= inimigo_right &&
+            proj_y >= inimigo_top && proj_y <= inimigo_bottom) {
+            return 1; // Colidiu com inimigo
+        }
+    } else if (player != NULL) {
+        // Colisão com jogador
+        int proj_x = projetil->x;
+        int proj_y = projetil->y;
+
+        int player_left = player->x - player->largura / 2;
+        int player_right = player->x + player->largura / 2;
+        int player_top = player->y - player->altura / 2;
+        int player_bottom = player->y + player->altura / 2;
+
+        if (proj_x >= player_left && proj_x <= player_right &&
+            proj_y >= player_top && proj_y <= player_bottom) {
+            return 2; // Colidiu com jogador
+        }
+    }
+    return 0; // Sem colisão
+}
+
+// Função para verificar colisão entre jogador e inimigo
 unsigned char verifica_colisao_players(jogador *player, inimigo *inimigo, unsigned short max_x){
-
-    if ((((inimigo->y - inimigo->altura / 2 >= player->y - player->altura / 2) && (player->y + player->altura / 2 >= inimigo->y - inimigo->altura / 2)) ||
-        ((player->y - player->altura / 2 >= inimigo->y - inimigo->altura / 2) && (inimigo->y + inimigo->altura / 2 >= player->y - player->altura / 2))) &&
-        (((inimigo->x - inimigo->largura / 2 >= player->x - player->largura / 2) && (player->x + player->largura / 2 >= inimigo->x - inimigo->largura / 2)) ||
-        ((player->x - player->largura / 2 >= inimigo->x - inimigo->largura / 2) && (inimigo->x + inimigo->largura / 2 >= player->x - player->largura / 2)))) {
-
-        player->hp -= inimigo->dano; // Diminui o HP do jogador pelo dano do inimigo
+    if (verifica_colisao(player, inimigo)) {
+        if (inimigo->dano >= player->hp) {
+            player->hp = 0;
+        } else {
+            player->hp -= inimigo->dano;
+        }
         inimigo->hp = 0; // Inimigo é destruído
-
+        printf("Colisão detectada entre jogador e inimigo. Player HP: %u\n", player->hp);
         return 1;
     }
-
     return 0;
 }
 
-unsigned char colisao_projeteis(nodo_bala *projetil, jogador *player, inimigo *inimigo) {
-
-    if (inimigo != NULL) {
-        return (
-            projetil->x >= inimigo->x - inimigo->largura / 2 &&
-            projetil->x <= inimigo->x + inimigo->largura / 2 &&
-            projetil->y >= inimigo->y - inimigo->altura / 2 &&
-            projetil->y <= inimigo->y + inimigo->altura / 2
-        );
-    }
-
-    return (
-        projetil->x >= player->x - player->largura / 2 &&
-        projetil->x <= player->x + player->largura / 2 &&
-        projetil->y >= player->y - player->altura / 2 &&
-        projetil->y <= player->y + player->altura / 2
-    );
-}
-
+// Função para verificar colisão de projéteis
 unsigned char verifica_colisao_projeteis(jogador *player, inimigo *inimigo, unsigned short max_x) {
     nodo_bala *atual_proj = player->projeteis->inicio;
     nodo_bala *anterior_proj = NULL;
@@ -49,7 +85,11 @@ unsigned char verifica_colisao_projeteis(jogador *player, inimigo *inimigo, unsi
     // Verifica projéteis do jogador atingindo o inimigo
     while (atual_proj) {
         if (colisao_projeteis(atual_proj, NULL, inimigo)) {
-            inimigo->hp -= atual_proj->dano; // Utiliza o dano do projétil atual
+            if (inimigo->hp <= atual_proj->dano) {
+                inimigo->hp = 0;
+            } else {
+                inimigo->hp -= atual_proj->dano;
+            }
 
             // Remove o projétil da lista
             if (!anterior_proj)
@@ -61,8 +101,11 @@ unsigned char verifica_colisao_projeteis(jogador *player, inimigo *inimigo, unsi
             atual_proj = atual_proj->prox;
             free(remover);
 
+            printf("Projétil atingiu inimigo. Inimigo HP: %u\n", inimigo->hp);
+
             // Verifica se o inimigo foi destruído
-            if (inimigo->hp <= 0) {
+            if (inimigo->hp == 0) {
+                printf("Inimigo foi destruído.\n");
                 return 1; // O inimigo foi destruído
             }
         } else {
@@ -78,7 +121,11 @@ unsigned char verifica_colisao_projeteis(jogador *player, inimigo *inimigo, unsi
 
         while (atual_proj) {
             if (colisao_projeteis(atual_proj, player, NULL)) {
-                player->hp -= atual_proj->dano; // Utiliza o dano do projétil atual
+                if (atual_proj->dano >= player->hp) {
+                    player->hp = 0;
+                } else {
+                    player->hp -= atual_proj->dano;
+                }
 
                 // Remove o projétil da lista
                 if (!anterior_proj)
@@ -89,6 +136,8 @@ unsigned char verifica_colisao_projeteis(jogador *player, inimigo *inimigo, unsi
                 nodo_bala *remover = atual_proj;
                 atual_proj = atual_proj->prox;
                 free(remover);
+
+                printf("Projétil inimigo atingiu jogador. Player HP: %u\n", player->hp);
                 return 2; // O jogador foi atingido
             } else {
                 anterior_proj = atual_proj;
@@ -100,7 +149,7 @@ unsigned char verifica_colisao_projeteis(jogador *player, inimigo *inimigo, unsi
     return 0;
 }
 
-
+// Função para obter o sprite do inimigo
 ALLEGRO_BITMAP* get_sprite(unsigned char tipo, infos_inimigos* infos_inimigos){
     switch(tipo){
         case 1:
@@ -116,13 +165,14 @@ ALLEGRO_BITMAP* get_sprite(unsigned char tipo, infos_inimigos* infos_inimigos){
     }
 }
 
+// Função principal da fase 1
 void fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], infos_inimigos *infos_inimigos, unsigned short max_x, unsigned short max_y){
     static unsigned int frame_count = 0;
     frame_count++;
 
     // A cada 300 frames (10 segundos)
     if (frame_count % 300 == 0){
-        // Cria 3 inimigos por vez
+        // Cria 4 inimigos por vez
         for (int i = 0; i < 4; i++){
             // Encontrar um slot livre no array inimigos[]
             int index = -1;
@@ -133,7 +183,7 @@ void fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], infos_ini
                 }
             }
             if (index != -1){
-                unsigned char tipo = aleat(1, 2); 
+                unsigned char tipo = aleat(1, 2);
                 unsigned char hp, dano;
                 unsigned char largura, altura;
 
@@ -157,96 +207,67 @@ void fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], infos_ini
                 unsigned short x = max_x + largura / 2;
                 unsigned short y = aleat(altura / 2, max_y - altura / 2);
                 inimigos[index] = cria_inimigo(tipo, hp, largura, altura, dano, x, y, max_x, max_y);
+                printf("Inimigo criado: Tipo %u, HP %u, Dano %u, Posição (%u, %u)\n", tipo, hp, dano, x, y);
             }
         }
     }
 
+    // Atualizar o jogador
     mov_jogador(player, 1, max_x, max_y);
-    al_clear_to_color(al_map_rgb(0, 0, 0)); 
+
+    // Limpar a tela antes de desenhar
+    al_clear_to_color(al_map_rgb(0, 0, 0));
+
+    // Desenhar projéteis do jogador
     desenha_projeteis_jog(player, max_x, max_y);
+
+    // Desenhar o jogador
     desenha_jogador(player);
 
+    // Iterar sobre todos os inimigos
     for (int i = 0; i < MAX_INIMIGOS; i++){
         if (inimigos[i] != NULL){
+            // Mover o inimigo
             mov_inimigo(inimigos[i], 1, inimigos[i]->largura, inimigos[i]->altura, max_x, max_y);
 
+            // Verificar colisão com o jogador
             unsigned char c_players = verifica_colisao_players(player, inimigos[i], max_x);
+            if (c_players == 1){
+                // Colidiu com o jogador, inimigo destruído
+                destroi_inimigo(inimigos[i]);
+                inimigos[i] = NULL;
+            }
 
-            // Verifica colisão de projéteis
+            // Verificar colisão de projéteis
             unsigned char c_projeteis = verifica_colisao_projeteis(player, inimigos[i], max_x);
-            if (inimigos[i]->tipo == 1)
-                desenha_projeteis_inimigo(inimigos[i], max_x, max_y, infos_inimigos);
+            if (c_projeteis ==1){
+                // Inimigo foi destruído por projétil
+                destroi_inimigo(inimigos[i]);
+                inimigos[i] = NULL;
+            }
 
-            if (inimigos[i]->hp > 0){
+            // Desenhar projéteis do inimigo se for do tipo 1
+            if (inimigos[i] != NULL && inimigos[i]->tipo == 1){
+                desenha_projeteis_inimigo(inimigos[i], max_x, max_y, infos_inimigos);
+            }
+
+            // Desenhar o inimigo se ainda estiver vivo
+            if (inimigos[i] != NULL && inimigos[i]->hp >0){
                 ALLEGRO_BITMAP *sprite = get_sprite(inimigos[i]->tipo, infos_inimigos);
                 if (sprite){
                     desenha_inimigo(sprite, inimigos[i], inimigos[i]->largura, inimigos[i]->altura);
                 }
-            } 
+            }
 
+            // Remover inimigo se saiu da tela
             if (inimigos[i] != NULL && inimigos[i]->x + inimigos[i]->largura / 2 < 0){
+                printf("Inimigo saiu da tela e será removido.\n");
                 destroi_inimigo(inimigos[i]);
                 inimigos[i] = NULL;
             }
         }
     }
 
+    // Atualizar a tela após desenhar tudo
     al_flip_display();
 }
-
-
-/*
-void fase2 (ALLEGRO_TIMER* timer, jogador* player, unsigned short max_x, unsigned short max_y) {
-    static int ultimo_tempo = 0; // Armazena o último tempo processado
-    int tempo = (int)(al_get_timer_count(timer) / 30.0);
-
-    // Executa apenas quando o tempo atual for maior que o último tempo registrado
-    if (tempo > ultimo_tempo) {
-        ultimo_tempo = tempo; // Atualiza o último tempo
-
-        switch (tempo) {
-        case 10:
-            printf("tempo 10\n");
-            break;
-        case 20:
-            printf("tempo 20\n");
-            break;
-        case 30:
-            printf("tempo 30\n");
-            break;
-        case 40:
-            printf("tempo 40\n");
-            break;
-        case 50:
-            printf("tempo 50\n");
-            break;
-        case 60:
-            printf("tempo 60\n");
-            break;
-        case 70:
-            printf("tempo 70\n");
-            break;
-        default:
-            break;
-        }
-    }
-
-    mov_jogador(player, 1, max_x, max_y);
-
-    al_clear_to_color(al_map_rgb(0, 0, 0)); // Limpar tela
-
-    desenha_projeteis_jog(player, max_x, max_y);
-    desenha_jogador(player);
-
-    al_flip_display();
-}
-
-void atualiza_fase(ALLEGRO_TIMER* timer, unsigned char* fase_atual) {
-    double tempo = al_get_timer_count(timer) / 30.0; // Tempo em segundos
-    if (tempo < 60) {
-        *fase_atual = 1;
-    } else {
-        *fase_atual = 2;
-    }
-}
-*/
