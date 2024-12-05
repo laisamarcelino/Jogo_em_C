@@ -3,3 +3,15 @@
 - [ ]  Implementar boss
 - [ ]  Fazer fase 2
 - [ ]  Fazer historia inicial
+
+compila:
+gcc main.c fases.c jogador.c joystick.c inimigos.c projeteis.c -o AS $(pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 allegro_image-5 --libs --cflags) -lm
+
+executa:
+./AS
+
+joga:
+w a s d - anda
+e - atira
+x - vai ser o especial
+esc encerra programa
