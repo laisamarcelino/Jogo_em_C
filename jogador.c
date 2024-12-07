@@ -7,8 +7,7 @@
 
 #define FRAMES_JOGADOR 5
 
-jogador* cria_jogador(unsigned char hp, unsigned short largura, unsigned short altura, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y){
-
+jogador* cria_jogador(unsigned char hp, unsigned short largura, unsigned short altura, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y) {
     jogador *novo_jogador = (jogador*)malloc(sizeof(jogador));
     if (!novo_jogador) 
         return NULL;
@@ -16,15 +15,15 @@ jogador* cria_jogador(unsigned char hp, unsigned short largura, unsigned short a
     novo_jogador->hp = hp;
     novo_jogador->largura = largura;
     novo_jogador->altura = altura;
-    novo_jogador->tipo_ataque = 0;
     novo_jogador->x = x;
     novo_jogador->y = y;
+    novo_jogador->tipo_ataque = 0;
     novo_jogador->controle = cria_joystick();
-    novo_jogador->projeteis = cria_projetil_lista(); 
-    
+    novo_jogador->projeteis = cria_projetil_lista();
 
     return novo_jogador;
 }
+
 
 void mov_jogador(jogador* jog, char passos, unsigned short max_x, unsigned short max_y) {
     if (jog->controle->cima && jog->y > jog->altura / 2) 
@@ -148,29 +147,10 @@ void desenha_projeteis_jog(jogador *jog, unsigned short max_x, unsigned short ma
             break;
         
         default:
-            al_draw_bitmap_region(sp_p,atual->frame * l_p, 0, l_p, a_p,atual->x - l_p / 2, atual->y - a_p / 2, 0);
+            al_draw_bitmap_region(sp_p, atual->frame * l_p, 0, l_p, a_p,atual->x - l_p / 2, atual->y - a_p / 2, 0);
             break; 
         }
 
         atual = atual->prox;
     }
-}
-
-void desenha_icone_especial(especial_jog *especial){
-    ALLEGRO_BITMAP *especial1 = al_load_bitmap("./sprites/especial1.png");
-    ALLEGRO_BITMAP *especial2 = al_load_bitmap("./sprites/especial2.png");
-
-    if (!especial1 || !especial2) {
-        fprintf(stderr, "Erro ao carregar sprites de especial.\n");
-        return;
-    }
-
-    unsigned short l1 = al_get_bitmap_width(especial1) / 8;
-    unsigned short a1 = al_get_bitmap_height(especial1);
-    unsigned short l2 = al_get_bitmap_width(especial2) / 8;
-    unsigned short a2 = al_get_bitmap_height(especial2);
-    
-    // PAREI AQUI
-    al_draw_bitmap_region(sp_p, atual->frame * l_p, 0, l_p, a_p,atual->x - l_p / 2, atual->y - a_p / 2, 0);
-
 }

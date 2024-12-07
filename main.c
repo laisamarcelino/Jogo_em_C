@@ -1,4 +1,4 @@
-// gcc main.c fases.c jogador.c joystick.c inimigos.c projeteis.c -o AS $(pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 allegro_image-5 --libs --cflags) -lm
+// gcc main.c fases.c jogador.c especial.c joystick.c inimigos.c projeteis.c -o AS $(pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 allegro_image-5 --libs --cflags) -lm
 
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
@@ -10,6 +10,7 @@
 #include "joystick.h"
 #include "projeteis.h"
 #include "fases.h"
+#include "especial.h"
 
 #include <stdio.h>
 #include <time.h>
@@ -22,6 +23,8 @@
 #define Y_TELA 720
 #define FRAME_RATE 30.0
 #define MAX_INIMIGOS 100
+#define MAX_ESPECIAIS 100
+
 
 void libera_mem(ALLEGRO_TIMER* timer, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_FONT* font, ALLEGRO_DISPLAY* disp, jogador* player, inimigo* inimigos[], infos_inimigos* infos_inimigos) {
     if (player) destroi_jogador(player);
@@ -134,8 +137,6 @@ int main(){
     unsigned int frame_count = 0;
     inimigo* inimigos[MAX_INIMIGOS] = {NULL};
     bool running = true;
-    bool ativa_especial = false;
-    bool ativa_projetil = true;
 
     /* -------------------- Criação dos Personagens -------------------- */
 
@@ -161,8 +162,6 @@ int main(){
         if (event.type == ALLEGRO_EVENT_TIMER) {
             if (player->hp > 0){
                 fase1(timer, player, inimigos, infos_inimigos, X_TELA, Y_TELA);
-                // Remover ou substituir o printf em produção
-                printf("HP do Jogador: %u\n", player->hp); //DEBUG
             }
             else {
                 // O jogador morreu; encerrar o loop principal
@@ -183,21 +182,19 @@ int main(){
                     chave_joystick[2] = 1;
                     break;
                 case ALLEGRO_KEY_D:
-                    chave_joystick[3] = 1;
+                    chave_joystick[3] = 1; 
                     break;
                 case ALLEGRO_KEY_E:
                     chave_joystick[4] = 1;
-                    if (ativa_projetil) {
+                    if (!player->tipo_ataque) {
                         ataque_jogador(player);
-                        ativa_especial = false;
                     }
                     break;
                 case ALLEGRO_KEY_X:
                     chave_joystick[5] = 1;
-                    if (ativa_especial){
-                        player->tipo_ataque = 1; // Restaurar o tipo de ataque em fases.c com base na duração do ataque
+                    if (player->tipo_ataque) { 
                         ataque_jogador(player);
-                        ativa_projetil = false;
+                        printf("Ataque especial disparado!\n"); // DEBUG
                     } 
                     break;
                 default:

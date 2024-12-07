@@ -1,13 +1,24 @@
 #ifndef __ESPECIAL__
 #define __ESPECIAL__
 
+#include "stdbool.h"
+#include "jogador.h"
+
+#define PASSOS_ESPECIAL 10
+
 typedef struct {
-    unsigned char timer; // Cadência de tiro
-    unsigned char duracao; // Duração do ataque especial
-    unsigned char dano;
-    //balas *balas;
+    unsigned char largura;
+    unsigned char altura;
+    unsigned short x;
+    unsigned short y;
+    unsigned char tipo_ataque;
+    unsigned int duracao_especial;
+    bool ativo;
+} especial_jog;
 
-} especial;
-
+especial_jog* cria_especial(unsigned char tipo, unsigned short largura, unsigned short altura, unsigned short x, unsigned short y);
+void desenha_especial(especial_jog *especial, jogador *player);
+void mov_especial (especial_jog* especial, unsigned char passos, unsigned char max_x, unsigned char max_y);
+void destroi_especial(especial_jog *especial);
 
 #endif

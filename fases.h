@@ -3,6 +3,7 @@
 
 #include "jogador.h"
 #include "inimigos.h"
+#include "especial.h"
 #include <allegro5/allegro.h>
 
 #define MAX_INIMIGOS 100

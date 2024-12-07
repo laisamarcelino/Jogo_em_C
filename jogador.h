@@ -3,7 +3,7 @@
 
 #include "joystick.h"
 #include "projeteis.h"
-#include "especial.h"
+#include "stdbool.h"
 
 #define PASSOS_JOGADOR 10
 
@@ -18,19 +18,11 @@ typedef struct {
 	projetil_lista *projeteis; // Lista de projéteis do jogador
 } jogador;
 
-typedef struct {
-    unsigned char largura;
-    unsigned char altura;
-    unsigned short x;
-    unsigned short y;
-} especial_jog;
-
 jogador* cria_jogador(unsigned char hp, unsigned short largura, unsigned short altura, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y);
 void mov_jogador(jogador* jog, char passos, unsigned short max_x, unsigned short max_y);
 void ataque_jogador(jogador *jog);
 void destroi_jogador(jogador *jog);
 void desenha_jogador(jogador *jog);
 void desenha_projeteis_jog(jogador *jog, unsigned short max_x, unsigned short max_y);
-void desenha_icone_especial(especial_jog *especial);
 
 #endif																									

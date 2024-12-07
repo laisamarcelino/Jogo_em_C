@@ -121,12 +121,11 @@ unsigned char verifica_colisao_projeteis(jogador *player, inimigo *inimigo, unsi
 
         while (atual_proj) {
             if (colisao_projeteis(atual_proj, player, NULL)) {
-                if (atual_proj->dano >= player->hp) {
+                if (atual_proj->dano >= player->hp) 
                     player->hp = 0;
-                } else {
+                else 
                     player->hp -= atual_proj->dano;
-                }
-
+                
                 // Remove o projétil da lista
                 if (!anterior_proj)
                     inimigo->projeteis->inicio = atual_proj->prox;
@@ -139,7 +138,8 @@ unsigned char verifica_colisao_projeteis(jogador *player, inimigo *inimigo, unsi
 
                 printf("Projétil inimigo atingiu jogador. Player HP: %u\n", player->hp);
                 return 2; // O jogador foi atingido
-            } else {
+            } 
+            else {
                 anterior_proj = atual_proj;
                 atual_proj = atual_proj->prox;
             }
@@ -148,6 +148,27 @@ unsigned char verifica_colisao_projeteis(jogador *player, inimigo *inimigo, unsi
 
     return 0;
 }
+/*
+unsigned char verifica_colisao_especial(jogador* player, especial_jog* elem) {
+    if (elem && elem->ativo) {
+        int player_left = player->x - player->largura / 2;
+        int player_right = player->x + player->largura / 2;
+        int player_top = player->y - player->altura / 2;
+        int player_bottom = player->y + player->altura / 2;
+
+        int elem_left = elem->x - elem->largura / 2;
+        int elem_right = elem->x + elem->largura / 2;
+        int elem_top = elem->y - elem->altura / 2;
+        int elem_bottom = elem->y + elem->altura / 2;
+
+        if (player_right > elem_left && player_left < elem_right &&
+            player_bottom > elem_top && player_top < elem_bottom) {
+            return 1; // Colisão detectada
+        }
+    }
+    return 0; // Sem colisão
+}*/
+
 
 // Função para obter o sprite do inimigo
 ALLEGRO_BITMAP* get_sprite(unsigned char tipo, infos_inimigos* infos_inimigos){
@@ -165,38 +186,38 @@ ALLEGRO_BITMAP* get_sprite(unsigned char tipo, infos_inimigos* infos_inimigos){
     }
 }
 
-// Função principal da fase 1
-void fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], infos_inimigos *infos_inimigos, unsigned short max_x, unsigned short max_y){
+void fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], infos_inimigos *infos_inimigos, unsigned short max_x, unsigned short max_y) {
     static unsigned int frame_count = 0;
+    static unsigned int especial_duracao_timer = 0; // Temporizador do ataque especial
+    especial_jog* especial;
     frame_count++;
+    //printf("frame count %u\n", frame_count);
 
-    // A cada 300 frames (10 segundos)
-    if (frame_count % 300 == 0){
-        // Cria 4 inimigos por vez
-        for (int i = 0; i < 4; i++){
-            // Encontrar um slot livre no array inimigos[]
+    // Cria inimigos a cada 300 frames (10 segundos)
+    if (frame_count % 300 == 0) {
+        for (int i = 0; i < 4; i++) {
             int index = -1;
-            for (int j = 0; j < MAX_INIMIGOS; j++){
-                if (inimigos[j] == NULL){
+            for (int j = 0; j < MAX_INIMIGOS; j++) {
+                if (inimigos[j] == NULL) {
                     index = j;
                     break;
                 }
             }
-            if (index != -1){
+            if (index != -1) {
                 unsigned char tipo = aleat(1, 2);
                 unsigned char hp, dano;
                 unsigned char largura, altura;
 
-                switch(tipo) {
+                switch (tipo) {
                     case 1:
                         hp = 2;
-                        dano = 1; //dano ao encostar no personagem
+                        dano = 1; // dano ao encostar no personagem
                         largura = infos_inimigos->l1;
                         altura = infos_inimigos->a1;
                         break;
                     case 2:
                         hp = 3;
-                        dano = 1; 
+                        dano = 1;
                         largura = infos_inimigos->l2;
                         altura = infos_inimigos->a2;
                         break;
@@ -211,11 +232,38 @@ void fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], infos_ini
             }
         }
     }
-
-    if (frame_count == 600) {
-        //desenha_especial_jog();
+    if (frame_count == 100 || frame_count == 900) { // A cada 20 segundos
+        unsigned short x = max_x-100;
+        unsigned short y = max_y/2;
+        especial = cria_especial(1, 30, 30, x, y);
+        printf("Elemento especial criado em (%u, %u).\n", x, y); // DEBUG
     }
 
+    if (frame_count == 600)
+        printf("frame de 20s\n");
+/*
+    // Verifica colisão com o jogador para coletar o ataque especial
+    if (especial && verifica_colisao_especial(player, especial)) {
+        printf("Jogador coletou o elemento especial.\n"); // DEBUG
+        player->especial = especial; // Associa o especial ao jogador
+        especial_duracao_timer = 300; // Duração do ataque especial (5 segundos em 60 FPS)
+        especial->ativo = false;
+        free(especial);
+        especial = NULL;
+    }
+
+    // Gerenciar o temporizador do ataque especial
+    if (especial_duracao_timer > 0) {
+        especial_duracao_timer--;
+        if (especial_duracao_timer == 0) {
+            printf("Ataque especial expirou.\n"); // DEBUG
+            player->especial = NULL; // Remove o ataque especial após o tempo
+        }
+    }
+*/  
+
+    mov_especial(especial, 1, max_x, max_y);
+ 
     // Atualizar o jogador
     mov_jogador(player, 1, max_x, max_y);
 
@@ -228,51 +276,45 @@ void fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], infos_ini
     // Desenhar projéteis do jogador
     desenha_projeteis_jog(player, max_x, max_y);
 
-    
+    //Desenha espacial
+    desenha_especial(especial, player);
+
     // Iterar sobre todos os inimigos
-    for (int i = 0; i < MAX_INIMIGOS; i++){
-        if (inimigos[i] != NULL){
-            // Mover o inimigo
+    for (int i = 0; i < MAX_INIMIGOS; i++) {
+        if (inimigos[i] != NULL) {
             mov_inimigo(inimigos[i], 1, inimigos[i]->largura, inimigos[i]->altura, max_x, max_y);
 
-            // Verificar colisão com o jogador
             unsigned char c_players = verifica_colisao_players(player, inimigos[i], max_x);
-            if (c_players == 1){
-                // Colidiu com o jogador, inimigo destruído
+            if (c_players == 1) {
                 destroi_inimigo(inimigos[i]);
                 inimigos[i] = NULL;
             }
 
-            // Verificar colisão de projéteis
             unsigned char c_projeteis = verifica_colisao_projeteis(player, inimigos[i], max_x);
-            if (c_projeteis ==1){
-                // Inimigo foi destruído por projétil
+            if (c_projeteis == 1) {
                 destroi_inimigo(inimigos[i]);
                 inimigos[i] = NULL;
             }
 
-            // Desenhar projéteis do inimigo se for do tipo 1
-            if (inimigos[i] != NULL && inimigos[i]->tipo == 1){
+            if (inimigos[i] != NULL && inimigos[i]->tipo == 1) {
                 desenha_projeteis_inimigo(inimigos[i], max_x, max_y, infos_inimigos);
             }
 
-            // Desenhar o inimigo se ainda estiver vivo
-            if (inimigos[i] != NULL && inimigos[i]->hp >0){
-                ALLEGRO_BITMAP *sprite = get_sprite(inimigos[i]->tipo, infos_inimigos);
-                if (sprite){
+            if (inimigos[i] != NULL && inimigos[i]->hp > 0) {
+                ALLEGRO_BITMAP* sprite = get_sprite(inimigos[i]->tipo, infos_inimigos);
+                if (sprite) {
                     desenha_inimigo(sprite, inimigos[i], inimigos[i]->largura, inimigos[i]->altura);
                 }
             }
 
-            // Remover inimigo se saiu da tela
-            if (inimigos[i] != NULL && inimigos[i]->x + inimigos[i]->largura / 2 < 0){
-                printf("Inimigo saiu da tela e será removido.\n");
+            if (inimigos[i] != NULL && inimigos[i]->x + inimigos[i]->largura / 2 < 0) {
+                printf("Inimigo saiu da tela e será removido.\n"); //DEBUG
                 destroi_inimigo(inimigos[i]);
                 inimigos[i] = NULL;
             }
         }
     }
 
-    // Atualizar a tela após desenhar tudo
     al_flip_display();
 }
+
