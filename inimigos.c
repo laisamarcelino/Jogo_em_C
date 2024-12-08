@@ -7,7 +7,7 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 
-inimigo* cria_inimigo(unsigned char tipo, unsigned char hp, unsigned char largura, unsigned char altura, unsigned char dano, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y) {
+inimigo* cria_inimigo(unsigned char tipo, unsigned char hp, unsigned char largura, unsigned char altura, unsigned char dano, bool ativa_especial, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y) {
     inimigo *novo_inimigo = (inimigo*)malloc(sizeof(inimigo));
     if (!novo_inimigo)
         return NULL;
@@ -26,6 +26,7 @@ inimigo* cria_inimigo(unsigned char tipo, unsigned char hp, unsigned char largur
     novo_inimigo->tempo_anim = 0;
     novo_inimigo->frame_atual_proj = 0;
     novo_inimigo->tempo_anim_proj = 0;
+    novo_inimigo->ativa_especial = ativa_especial;
 
     return novo_inimigo;
 }
@@ -90,10 +91,16 @@ void ataque_inimigo(inimigo *inimigo){
             dano = 3;
             break;
         case 5: //boss 1
-            dano = 5;
+            if (inimigo->ativa_especial)
+                dano = 10;
+            else
+                dano = 5;
             break;
         case 6: //boss 2
-            dano = 10;
+            if (inimigo->ativa_especial)
+                dano = 15;
+            else
+                dano = 10;
             break;
         
         default:
@@ -160,8 +167,6 @@ void desenha_inimigo(ALLEGRO_BITMAP *sprite, inimigo *inimigo, unsigned short la
     );
 }
 
-
-
 infos_inimigos* carrega_sprites() {
     infos_inimigos *novo_infos = (infos_inimigos*)malloc(sizeof(infos_inimigos));
     if (!novo_infos) {
@@ -178,6 +183,8 @@ infos_inimigos* carrega_sprites() {
     novo_infos->boss2 = al_load_bitmap("./sprites/boss2.png");
     novo_infos->projetil2 = al_load_bitmap("./sprites/projetil1.png");
     novo_infos->projetil_boss1 = al_load_bitmap("./sprites/projetil_boss1.png");
+    novo_infos->projetil_boss1_especial = al_load_bitmap("./sprites/projetil_boss1_especial.png");
+    
 
     // Verificação de carregamento
     if (!novo_infos->inimigo1 || !novo_infos->inimigo2 || !novo_infos->inimigo3 || 
@@ -193,6 +200,7 @@ infos_inimigos* carrega_sprites() {
         if (novo_infos->boss2) al_destroy_bitmap(novo_infos->boss2);
         if (novo_infos->projetil2) al_destroy_bitmap(novo_infos->projetil2);
         if (novo_infos->projetil_boss1) al_destroy_bitmap(novo_infos->projetil_boss1);
+        if (novo_infos->projetil_boss1_especial) al_destroy_bitmap(novo_infos->projetil_boss1_especial);
         free(novo_infos);
         return NULL;
     }
@@ -214,6 +222,8 @@ infos_inimigos* carrega_sprites() {
     novo_infos->ap2 = al_get_bitmap_height(novo_infos->projetil2); 
     novo_infos->lpb1 = al_get_bitmap_width(novo_infos->projetil_boss1) / 4;
     novo_infos->apb1 = al_get_bitmap_height(novo_infos->projetil_boss1); 
+    novo_infos->lpbe1 = al_get_bitmap_width(novo_infos->projetil_boss1_especial) / 4;
+    novo_infos->apbe1 = al_get_bitmap_height(novo_infos->projetil_boss1_especial); 
 
     return novo_infos;
 }
@@ -237,7 +247,10 @@ void desenha_projeteis_inimigo(inimigo *inimigo, unsigned short max_x, unsigned 
             inimigo->frame_atual_proj = (inimigo->frame_atual_proj + 1) % 4;
         }
         else if (inimigo->tipo == 5) { // boss1 com 4 frames
-            inimigo->frame_atual_proj = (inimigo->frame_atual_proj + 1) % 4;
+            if(inimigo->ativa_especial)
+                inimigo->frame_atual_proj = (inimigo->frame_atual_proj + 1) % 4;
+            else
+                inimigo->frame_atual_proj = (inimigo->frame_atual_proj + 1) % 4;
         }
         else if (inimigo->tipo == 6) { // boss2 com 4 frames
             inimigo->frame_atual_proj = (inimigo->frame_atual_proj + 1) % 4;

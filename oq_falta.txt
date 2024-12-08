@@ -23,3 +23,9 @@ inimigo 3 -> hp 3 dano 2
 inimigo 4 -> hp 4 dano 3
 boss 1 -> hp 40 dano 5 especial 10 
 boss 2 -> hp 50 dano 10 especial 15
+
+
+Mudar depois dos testes
+- tirar comentarios de DEBUG
+- alterar tempo de aparecer boss e a vida dele 
+- especiais do boss 

@@ -216,39 +216,57 @@ unsigned char fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], 
 
                 unsigned short x = max_x + largura / 2;
                 unsigned short y = aleat(altura / 2, max_y - altura / 2);
-                inimigos[index] = cria_inimigo(tipo, hp, largura, altura, dano, x, y, max_x, max_y);
+                inimigos[index] = cria_inimigo(tipo, hp, largura, altura, dano, false, x, y, max_x, max_y);
                 printf("Inimigo criado: Tipo %u, HP %u, Dano %u, Posição (%u, %u)\n", tipo, hp, dano, x, y); // DEBUG
             }
         }
     }
-    
+
+    // Implementacao do boss
     if (frame_count == 610){ 
         if (boss1 == NULL){
             unsigned char l_boss = infos_inimigos->lb1;
             unsigned char a_boss = infos_inimigos->ab1;
             unsigned short x = max_x - l_boss/2;
             unsigned short y = max_y + a_boss/2;
-            boss1 = cria_inimigo(5, 1, l_boss, a_boss, 5, x, y, max_x, max_y);
+            boss1 = cria_inimigo(5, 1, l_boss, a_boss, 0, false, x, y, max_x, max_y);
             printf("Boss1 criado com sucesso: %u\n", boss1->tipo); // DEBUG
         }
     }
 
-    if (boss1 != NULL){
-        mov_inimigo(boss1, 1, infos_inimigos->lb1, infos_inimigos->ab1, max_x, max_y);
-        unsigned char c_boss = verifica_colisao_players(player, boss1, max_x);
-        if (!c_boss) {
-            destroi_inimigo(boss1);
-            boss1 = NULL;
-            player->hp = 0;
-        }
+    if (boss1 != NULL) {
+    static unsigned int contador_especial = 0; // Contador para controlar o especial
+    contador_especial++;
 
-        unsigned char c_projetil_boss = verifica_colisao_projeteis(player, boss1, max_x);
-        if (boss1->hp == 0) {
-            destroi_inimigo(boss1);
-            boss1 = NULL;
-            return 0;
-        }
+    // Alternar entre ativar/desativar o especial
+    if (contador_especial == 15 * FPS) { // 15 segundos para ativar o especial
+        boss1->ativa_especial = true;
+        printf("Especial ativado para o boss1.\n");
+    } 
+    else if (contador_especial == (15 + 5) * FPS) { // Após 5 segundos desativa
+        boss1->ativa_especial = false;
+        contador_especial = 0; // Reseta o contador
+        printf("Especial desativado para o boss1.\n");
     }
+
+    // Movimentação do boss
+    mov_inimigo(boss1, 1, infos_inimigos->lb1, infos_inimigos->ab1, max_x, max_y);
+
+    // Controle de colisões com o jogador
+    unsigned char c_boss = verifica_colisao_players(player, boss1, max_x);
+    if (!c_boss) {
+        destroi_inimigo(boss1);
+        boss1 = NULL;
+    }
+
+    // Controle de projéteis e fim do boss
+    unsigned char c_projetil_boss = verifica_colisao_projeteis(player, boss1, max_x);
+    if (boss1->hp == 0) {
+        destroi_inimigo(boss1);
+        boss1 = NULL;
+    }
+}
+
 
     // Atualizar o jogador
     mov_jogador(player, 1, max_x, max_y);
