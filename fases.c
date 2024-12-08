@@ -64,17 +64,23 @@ unsigned char colisao_projeteis(nodo_bala *projetil, jogador *player, inimigo *i
 
 // Função para verificar colisão entre jogador e inimigo
 unsigned char verifica_colisao_players(jogador *player, inimigo *inimigo, unsigned short max_x){
+    if (inimigo->tipo == 5 || inimigo->tipo == 6){
+        if (verifica_colisao(player, inimigo))
+            return 0;
+    }
+    
     if (verifica_colisao(player, inimigo)) {
-        if (inimigo->dano >= player->hp) {
+        if (inimigo->dano >= player->hp) 
             player->hp = 0;
-        } else {
+        
+        else 
             player->hp -= inimigo->dano;
-        }
+        
         inimigo->hp = 0; // Inimigo é destruído
-        printf("Colisão detectada entre jogador e inimigo. Player HP: %u\n", player->hp);
+        printf("Colisão detectada entre jogador e inimigo. Player HP: %u\n", player->hp); // DEBUG
         return 1;
     }
-    return 0;
+    return 2;
 }
 
 // Função para verificar colisão de projéteis
@@ -162,12 +168,14 @@ ALLEGRO_BITMAP* get_sprite(unsigned char tipo, infos_inimigos* infos_inimigos){
             return infos_inimigos->inimigo4;
         case 5:
             return infos_inimigos->boss1;
+        case 6:
+            return infos_inimigos->boss2;
         default:
             return NULL;
     }
 }
 
-void fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], infos_inimigos *infos_inimigos, unsigned short max_x, unsigned short max_y) {
+unsigned char fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], infos_inimigos *infos_inimigos, unsigned short max_x, unsigned short max_y) {
     static unsigned int frame_count = 0;
     frame_count++;
     static inimigo *boss1 = NULL;
@@ -214,24 +222,33 @@ void fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], infos_ini
         }
     }
     
-    /* --------------- Implementação do Boss --------------*/
-
     if (frame_count == 610){ 
         if (boss1 == NULL){
             unsigned char l_boss = infos_inimigos->lb1;
             unsigned char a_boss = infos_inimigos->ab1;
             unsigned short x = max_x - l_boss/2;
             unsigned short y = max_y + a_boss/2;
-            boss1 = cria_inimigo(5, 40, l_boss, a_boss, 5, x, y, max_x, max_y);
+            boss1 = cria_inimigo(5, 1, l_boss, a_boss, 5, x, y, max_x, max_y);
             printf("Boss1 criado com sucesso: %u\n", boss1->tipo); // DEBUG
         }
-        
     }
 
-    if (boss1 != NULL)
+    if (boss1 != NULL){
         mov_inimigo(boss1, 1, infos_inimigos->lb1, infos_inimigos->ab1, max_x, max_y);
-    
-// -----------------------------------------------
+        unsigned char c_boss = verifica_colisao_players(player, boss1, max_x);
+        if (!c_boss) {
+            destroi_inimigo(boss1);
+            boss1 = NULL;
+            player->hp = 0;
+        }
+
+        unsigned char c_projetil_boss = verifica_colisao_projeteis(player, boss1, max_x);
+        if (boss1->hp == 0) {
+            destroi_inimigo(boss1);
+            boss1 = NULL;
+            return 0;
+        }
+    }
 
     // Atualizar o jogador
     mov_jogador(player, 1, max_x, max_y);
@@ -245,13 +262,11 @@ void fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], infos_ini
     // Desenhar projéteis do jogador
     desenha_projeteis_jog(player, max_x, max_y);
 
-// ---------------------------- boos -------
     ALLEGRO_BITMAP* sprite_boss = get_sprite(5, infos_inimigos);
-    if (boss1 != NULL && sprite_boss != NULL){
+    if (boss1 != NULL && sprite_boss != NULL && boss1->hp > 0){
         desenha_inimigo(sprite_boss, boss1, boss1->largura, boss1->altura);
         desenha_projeteis_inimigo(boss1, max_x, max_y, infos_inimigos);
     }
-// --------------------------------------------------------------------------
 
     // Iterar sobre todos os inimigos
     for (int i = 0; i < MAX_INIMIGOS; i++) {
@@ -290,5 +305,6 @@ void fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], infos_ini
     }
 
     al_flip_display();
+    return 1;
 }
 

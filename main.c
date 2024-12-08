@@ -138,6 +138,7 @@ int main(){
     unsigned int frame_count = 0;
     inimigo* inimigos[MAX_INIMIGOS] = {NULL};
     bool running = true;
+    unsigned char running_fase1 = 1;
 
     /* -------------------- Criação dos Personagens -------------------- */
 
@@ -162,7 +163,13 @@ int main(){
 
         if (event.type == ALLEGRO_EVENT_TIMER) {
             if (player->hp > 0){
-                fase1(timer, player, inimigos, infos_inimigos, X_TELA, Y_TELA);
+                running_fase1 = fase1(timer, player, inimigos, infos_inimigos, X_TELA, Y_TELA);
+                
+                if (running_fase1 == 0){
+                    printf("vai para fase 2\n"); // DEBUG
+
+                }
+                
             }
             else {
                 // O jogador morreu; encerrar o loop principal
