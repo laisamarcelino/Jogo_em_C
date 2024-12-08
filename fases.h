@@ -6,6 +6,7 @@
 #include <allegro5/allegro.h>
 
 #define MAX_INIMIGOS 100
+#define FPS 60
 
 unsigned char verifica_colisao_players(jogador *player, inimigo *inimigo, unsigned short max_x);
 unsigned char colisao_projeteis(nodo_bala *projetil, jogador *player, inimigo *inimigo);
