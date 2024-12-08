@@ -1,4 +1,4 @@
-// gcc main.c fases.c jogador.c especial.c joystick.c inimigos.c projeteis.c -o AS $(pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 allegro_image-5 --libs --cflags) -lm
+// gcc main.c fases.c jogador.c joystick.c inimigos.c projeteis.c -o AS $(pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 allegro_image-5 --libs --cflags) -lm
 
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
@@ -10,7 +10,6 @@
 #include "joystick.h"
 #include "projeteis.h"
 #include "fases.h"
-#include "especial.h"
 
 #include <stdio.h>
 #include <time.h>

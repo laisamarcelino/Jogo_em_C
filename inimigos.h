@@ -38,7 +38,6 @@ inimigo* cria_inimigo(unsigned char tipo, unsigned char hp, unsigned char largur
 unsigned short aleat (unsigned short min, unsigned short max);
 void mov_inimigo(inimigo *inimigo, char passos, unsigned char largura, unsigned char altura, unsigned short max_x, unsigned short max_y);
 void ataque_inimigo(inimigo *inimigo);
-void especial_inimigo(inimigo *inimigo);
 void destroi_inimigo(inimigo *inimigo);
 void desenha_inimigo(ALLEGRO_BITMAP *sprite, inimigo *inimigo, unsigned short largura, unsigned short altura);
 void desenha_projeteis_inimigo(inimigo *inimigo, unsigned short max_x, unsigned short max_y, infos_inimigos *infos_inimigos);

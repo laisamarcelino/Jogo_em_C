@@ -166,11 +166,9 @@ ALLEGRO_BITMAP* get_sprite(unsigned char tipo, infos_inimigos* infos_inimigos){
             return NULL;
     }
 }
-especial_jog* especial = NULL; // Declarar fora da função, controle global.
 
 void fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], infos_inimigos *infos_inimigos, unsigned short max_x, unsigned short max_y) {
     static unsigned int frame_count = 0;
-    static unsigned int especial_duracao_timer = 0; // Temporizador do ataque especial
     frame_count++;
     static inimigo *boss1 = NULL;
 
