@@ -40,6 +40,8 @@ void libera_mem(ALLEGRO_TIMER* timer, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_FONT* 
         if (infos_inimigos->inimigo2) al_destroy_bitmap(infos_inimigos->inimigo2);
         if (infos_inimigos->inimigo3) al_destroy_bitmap(infos_inimigos->inimigo3);
         if (infos_inimigos->inimigo4) al_destroy_bitmap(infos_inimigos->inimigo4);
+        if (infos_inimigos->boss1) al_destroy_bitmap(infos_inimigos->boss1);
+
         free(infos_inimigos);
     }
 
@@ -186,16 +188,10 @@ int main(){
                     break;
                 case ALLEGRO_KEY_E:
                     chave_joystick[4] = 1;
-                    if (!player->tipo_ataque) {
-                        ataque_jogador(player);
-                    }
+                    ataque_jogador(player);
                     break;
                 case ALLEGRO_KEY_X:
-                    chave_joystick[5] = 1;
-                    if (player->tipo_ataque) { 
-                        ataque_jogador(player);
-                        printf("Ataque especial disparado!\n"); // DEBUG
-                    } 
+                    chave_joystick[5] = 1; 
                     break;
                 default:
                     break;

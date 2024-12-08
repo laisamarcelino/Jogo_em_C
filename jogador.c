@@ -17,7 +17,7 @@ jogador* cria_jogador(unsigned char hp, unsigned short largura, unsigned short a
     novo_jogador->altura = altura;
     novo_jogador->x = x;
     novo_jogador->y = y;
-    novo_jogador->tipo_ataque = 0;
+    //novo_jogador->tipo_ataque = 0;
     novo_jogador->controle = cria_joystick();
     novo_jogador->projeteis = cria_projetil_lista();
 

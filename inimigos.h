@@ -29,7 +29,7 @@ typedef struct {
 typedef struct {
     ALLEGRO_BITMAP *inimigo1, *inimigo2, *inimigo3, *inimigo4;
     ALLEGRO_BITMAP *boss1, *boss2;
-    ALLEGRO_BITMAP *projetil2; 
+    ALLEGRO_BITMAP *projetil2, *projetil3, *projetil4, *projetil_boss1, *projetil_boss2; 
     unsigned short l1, a1, l2, a2, l3, a3, l4, a4, lb1, ab1, lb2, ab2;
     unsigned short lp2, lp3, lp4, lpb1, lpb2, ap2, ap3, ap4, apb1, apb2;
 } infos_inimigos;
