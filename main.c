@@ -16,10 +16,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-/*#define X_TELA 1920
-#define Y_TELA 1080*/
-#define X_TELA 1280
-#define Y_TELA 720
+#define X_TELA 1920
+#define Y_TELA 1080
+/*#define X_TELA 1280
+#define Y_TELA 720*/
 #define FRAME_RATE 30.0
 #define MAX_INIMIGOS 100
 #define MAX_ESPECIAIS 100

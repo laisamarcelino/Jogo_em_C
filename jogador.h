@@ -5,7 +5,7 @@
 #include "projeteis.h"
 #include "stdbool.h"
 
-#define PASSOS_JOGADOR 10
+#define PASSOS_JOGADOR 12
 
 typedef struct {
     unsigned char hp; // Quantidade de vida

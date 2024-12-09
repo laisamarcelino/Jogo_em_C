@@ -6,7 +6,7 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 
-#define PASSOS_INIMIGO 8
+#define PASSOS_INIMIGO 10
 #define FRAMES_INIMIGO 3
 
 typedef struct {
