@@ -177,6 +177,139 @@ ALLEGRO_BITMAP* get_sprite(unsigned char tipo, infos_inimigos* infos_inimigos){
 
 unsigned char fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], infos_inimigos *infos_inimigos, unsigned short max_x, unsigned short max_y) {
     static unsigned int frame_count = 0;
+    static inimigo *boss1 = NULL;
+    frame_count++;
+
+    // Criação de inimigos simples a cada 10s (exemplo mantido) 
+    if (frame_count % (10*FPS) == 0 && frame_count < (10*FPS)*2) {
+        for (int i = 0; i < 4; i++) {
+            int index = -1;
+            for (int j = 0; j < MAX_INIMIGOS; j++) {
+                if (inimigos[j] == NULL) {
+                    index = j;
+                    break;
+                }
+            }
+            if (index != -1) {
+                unsigned char tipo = aleat(1, 2);
+                unsigned char hp, dano;
+                unsigned char largura, altura;
+
+                switch (tipo) {
+                    case 1:
+                        hp = 2;
+                        dano = 1;
+                        largura = infos_inimigos->l1;
+                        altura = infos_inimigos->a1;
+                        break;
+                    case 2:
+                        hp = 3;
+                        dano = 1;
+                        largura = infos_inimigos->l2;
+                        altura = infos_inimigos->a2;
+                        break;
+                    default:
+                        continue; 
+                }
+
+                unsigned short x = max_x + largura / 2;
+                unsigned short y = aleat(altura / 2, max_y - altura / 2);
+                inimigos[index] = cria_inimigo(tipo, hp, largura, altura, dano, false, x, y, max_x, max_y);
+            }
+        }
+    }
+
+    // Criação do Boss1 após 610 frames (~10.16s)
+    if (frame_count == 610){ 
+        if (boss1 == NULL){
+            unsigned char l_boss = infos_inimigos->lb1;
+            unsigned char a_boss = infos_inimigos->ab1;
+            unsigned short x = max_x - l_boss/2;
+            unsigned short y = max_y + a_boss/2;
+            boss1 = cria_inimigo(5, 1, l_boss, a_boss, 0, false, x, y, max_x, max_y);
+        }
+    }
+
+    // Lógica do ataque especial do Boss1
+    if (boss1 != NULL) {
+        // Calcula tempo de jogo em segundos
+        unsigned int tempo_decorrido = frame_count / FPS;
+
+        // A cada 20 segundos: 0-14 normal, 15-19 especial
+        // Isto significa que sempre que (tempo_decorrido % 20) < 5, ativamos especial.
+        if ((tempo_decorrido % 20) < 5) {
+            boss1->ativa_especial = true;
+        } else {
+            boss1->ativa_especial = false;
+        }
+
+        // Movimentação, colisão do boss
+        mov_inimigo(boss1, 1, boss1->largura, boss1->altura, max_x, max_y);
+        unsigned char c_boss = verifica_colisao_players(player, boss1, max_x);
+        if (!c_boss) {
+            destroi_inimigo(boss1);
+            boss1 = NULL;
+        }
+
+        unsigned char c_projetil_boss = verifica_colisao_projeteis(player, boss1, max_x);
+
+        // Desenhar boss
+        ALLEGRO_BITMAP* sprite_boss = get_sprite(5, infos_inimigos);
+        if (sprite_boss != NULL) {
+            desenha_inimigo(sprite_boss, boss1, boss1->largura, boss1->altura);
+
+            // Se o HP do boss for 0, significa que está na animação de morte
+            // Quando a animação atinge o frame final (frame_atual == 5), destruímos o boss.
+            if (boss1->hp <= 0 && boss1->frame_atual == 5 && boss1->tempo_anim >= TEMPO_POR_FRAME) {
+                destroi_inimigo(boss1);
+                boss1 = NULL;
+            }
+        }
+    }
+
+    // Atualizar e desenhar o jogador
+    mov_jogador(player, 1, max_x, max_y);
+    al_clear_to_color(al_map_rgb(0, 0, 0));
+    desenha_jogador(player);
+    desenha_projeteis_jog(player, max_x, max_y);
+
+    // Atualizar e desenhar inimigos comuns
+    for (int i = 0; i < MAX_INIMIGOS; i++) {
+        if (inimigos[i] != NULL) {
+            mov_inimigo(inimigos[i], 1, inimigos[i]->largura, inimigos[i]->altura, max_x, max_y);
+            unsigned char c_players = verifica_colisao_players(player, inimigos[i], max_x);
+            if (c_players == 1) {
+                destroi_inimigo(inimigos[i]);
+                inimigos[i] = NULL;
+            }
+
+            unsigned char c_projeteis = verifica_colisao_projeteis(player, inimigos[i], max_x);
+            if (c_projeteis == 1) {
+                destroi_inimigo(inimigos[i]);
+                inimigos[i] = NULL;
+            }
+
+            if (inimigos[i] != NULL && inimigos[i]->hp > 0) {
+                ALLEGRO_BITMAP* sprite = get_sprite(inimigos[i]->tipo, infos_inimigos);
+                if (sprite) {
+                    desenha_inimigo(sprite, inimigos[i], inimigos[i]->largura, inimigos[i]->altura);
+                }
+                desenha_projeteis_inimigo(inimigos[i], max_x, max_y, infos_inimigos);
+            }
+
+            if (inimigos[i] != NULL && inimigos[i]->x + inimigos[i]->largura / 2 < 0) {
+                destroi_inimigo(inimigos[i]);
+                inimigos[i] = NULL;
+            }
+        }
+    }
+
+    al_flip_display();
+    return 1;
+}
+
+unsigned char fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], infos_inimigos *infos_inimigos, unsigned short max_x, unsigned short max_y) {
+    static unsigned int frame_count = 0;
     frame_count++;
     static inimigo *boss1 = NULL;
 
@@ -234,38 +367,38 @@ unsigned char fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], 
         }
     }
 
-    if (boss1 != NULL) {
-    static unsigned int contador_especial = 0; // Contador para controlar o especial
-    contador_especial++;
+        if (boss1 != NULL) {
+        static unsigned int contador_especial = 0; // Contador para controlar o especial
+        contador_especial++;
 
-    // Alternar entre ativar/desativar o especial
-    if (contador_especial == 15 * FPS) { // 15 segundos para ativar o especial
-        boss1->ativa_especial = true;
-        printf("Especial ativado para o boss1.\n");
-    } 
-    else if (contador_especial == (15 + 5) * FPS) { // Após 5 segundos desativa
-        boss1->ativa_especial = false;
-        contador_especial = 0; // Reseta o contador
-        printf("Especial desativado para o boss1.\n");
+        // Alternar entre ativar/desativar o especial
+        if (contador_especial == 3 * FPS) { // 15 segundos para ativar o especial
+            boss1->ativa_especial = true;
+            printf("Especial ativado para o boss1.\n");
+        }
+        else if (contador_especial == (15 + 5) * FPS) { // Após 5 segundos desativa
+            boss1->ativa_especial = false;
+            contador_especial = 0; // Reseta o contador
+            printf("Especial desativado para o boss1.\n");
+        }
+
+        // Movimentação do boss
+        mov_inimigo(boss1, 1, infos_inimigos->lb1, infos_inimigos->ab1, max_x, max_y);
+
+        // Controle de colisões com o jogador
+        unsigned char c_boss = verifica_colisao_players(player, boss1, max_x);
+        if (!c_boss) {
+            destroi_inimigo(boss1);
+            boss1 = NULL;
+        }
+
+        // Controle de projéteis e fim do boss
+        unsigned char c_projetil_boss = verifica_colisao_projeteis(player, boss1, max_x);
+        if (boss1->hp == 0) {
+            destroi_inimigo(boss1);
+            boss1 = NULL;
+        }
     }
-
-    // Movimentação do boss
-    mov_inimigo(boss1, 1, infos_inimigos->lb1, infos_inimigos->ab1, max_x, max_y);
-
-    // Controle de colisões com o jogador
-    unsigned char c_boss = verifica_colisao_players(player, boss1, max_x);
-    if (!c_boss) {
-        destroi_inimigo(boss1);
-        boss1 = NULL;
-    }
-
-    // Controle de projéteis e fim do boss
-    unsigned char c_projetil_boss = verifica_colisao_projeteis(player, boss1, max_x);
-    if (boss1->hp == 0) {
-        destroi_inimigo(boss1);
-        boss1 = NULL;
-    }
-}
 
 
     // Atualizar o jogador
@@ -280,11 +413,18 @@ unsigned char fase1(ALLEGRO_TIMER *timer, jogador *player, inimigo *inimigos[], 
     // Desenhar projéteis do jogador
     desenha_projeteis_jog(player, max_x, max_y);
 
-    ALLEGRO_BITMAP* sprite_boss = get_sprite(5, infos_inimigos);
-    if (boss1 != NULL && sprite_boss != NULL && boss1->hp > 0){
-        desenha_inimigo(sprite_boss, boss1, boss1->largura, boss1->altura);
-        desenha_projeteis_inimigo(boss1, max_x, max_y, infos_inimigos);
+   ALLEGRO_BITMAP* sprite_boss = get_sprite(5, infos_inimigos);
+    if (boss1 != NULL && sprite_boss != NULL) {
+        desenha_inimigo(sprite_boss, boss1, boss1->largura, boss1->altura);        
+
+        // Se o boss for destruído após a animação
+        if (boss1->hp <= 0 && boss1->frame_atual == 5 && boss1->tempo_anim >= TEMPO_POR_FRAME) {
+            destroi_inimigo(boss1);
+            boss1 = NULL;
+            printf("Boss1 foi destruído após animação completa.\n");
+        }
     }
+
 
     // Iterar sobre todos os inimigos
     for (int i = 0; i < MAX_INIMIGOS; i++) {
