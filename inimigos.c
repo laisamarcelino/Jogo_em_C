@@ -116,46 +116,35 @@ void destroi_inimigo(inimigo *inimigo){
     free(inimigo);  
 }
 
-void desenha_inimigo(ALLEGRO_BITMAP *sprite, inimigo *inimigo, unsigned short largura, unsigned short altura)
-{
-    if (!sprite)
-    {
+void desenha_inimigo(ALLEGRO_BITMAP *sprite, inimigo *inimigo, unsigned short largura, unsigned short altura) {
+    if (!sprite) {
         fprintf(stderr, "Sprite é NULL em desenha_inimigo.\n");
         return;
     }
 
     inimigo->tempo_anim++;
 
-    // Lógica de animação para o Boss 1
-    if (inimigo->tipo == 5) {
+    if (inimigo->tipo == 5) { // Lógica específica para Boss 1
         if (inimigo->hp > 0) {
-            // Alterna entre os dois frames da primeira coluna
+            // Animação normal (primeira linha com 2 frames)
             if (inimigo->tempo_anim >= TEMPO_POR_FRAME) {
-                inimigo->frame_atual = (inimigo->frame_atual + 1) % 2; // Apenas dois frames
+                inimigo->frame_atual = (inimigo->frame_atual + 1) % 2;
                 inimigo->tempo_anim = 0;
             }
-        }
-        else {
-            // Executa a animação da segunda coluna (6 frames)
-            if (inimigo->tempo_anim >= TEMPO_POR_FRAME && inimigo->frame_atual < 6) {
-                inimigo->frame_atual++;
-                inimigo->tempo_anim = 0;
+        } else {
+            // Animação de destruição (segunda linha com 6 frames)
+            if (inimigo->tempo_anim >= TEMPO_POR_FRAME) {
+                if (inimigo->frame_atual < 5) {
+                    // Avança até o último frame (0 a 5 total = 6 frames)
+                    inimigo->frame_atual++;
+                    inimigo->tempo_anim = 0;
+                }
             }
         }
     }
-    else {
-        // Atualiza animação para outros inimigos normalmente
-        if (inimigo->tempo_anim >= TEMPO_POR_FRAME)
-        {
-            inimigo->frame_atual = (inimigo->frame_atual + 1) % (al_get_bitmap_width(sprite) / largura);
-            inimigo->tempo_anim = 0;
-        }
-    }
 
-    // Calcular a posição horizontal do frame
-    unsigned short offset_x = (inimigo->tipo == 5 && inimigo->hp <= 0) ? largura * 2 : 0;
-    unsigned short frame_x = offset_x + inimigo->frame_atual * largura;
-
+    // Cálculo para selecionar o frame correto
+    unsigned short frame_x = inimigo->frame_atual * largura;
     unsigned short frame_y = (inimigo->hp > 0) ? 0 : altura;
 
     al_draw_bitmap_region(
@@ -166,6 +155,7 @@ void desenha_inimigo(ALLEGRO_BITMAP *sprite, inimigo *inimigo, unsigned short la
         0
     );
 }
+
 
 infos_inimigos* carrega_sprites() {
     infos_inimigos *novo_infos = (infos_inimigos*)malloc(sizeof(infos_inimigos));
@@ -189,7 +179,7 @@ infos_inimigos* carrega_sprites() {
     // Verificação de carregamento
     if (!novo_infos->inimigo1 || !novo_infos->inimigo2 || !novo_infos->inimigo3 || 
         !novo_infos->inimigo4 || !novo_infos->boss1 || !novo_infos->boss2 || 
-        !novo_infos->projetil2 || !novo_infos->projetil_boss1) {
+        !novo_infos->projetil2 || !novo_infos->projetil_boss1 || !novo_infos->projetil_boss1_especial) {
         fprintf(stderr, "Erro ao carregar sprites dos inimigos.\n");
         // Liberar os bitmaps que foram carregados com sucesso
         if (novo_infos->inimigo1) al_destroy_bitmap(novo_infos->inimigo1);
@@ -222,7 +212,7 @@ infos_inimigos* carrega_sprites() {
     novo_infos->ap2 = al_get_bitmap_height(novo_infos->projetil2); 
     novo_infos->lpb1 = al_get_bitmap_width(novo_infos->projetil_boss1) / 4;
     novo_infos->apb1 = al_get_bitmap_height(novo_infos->projetil_boss1); 
-    novo_infos->lpbe1 = al_get_bitmap_width(novo_infos->projetil_boss1_especial) / 4;
+    novo_infos->lpbe1 = al_get_bitmap_width(novo_infos->projetil_boss1_especial) / 5;
     novo_infos->apbe1 = al_get_bitmap_height(novo_infos->projetil_boss1_especial); 
 
     return novo_infos;
@@ -248,7 +238,7 @@ void desenha_projeteis_inimigo(inimigo *inimigo, unsigned short max_x, unsigned 
         }
         else if (inimigo->tipo == 5) { // boss1 com 4 frames
             if(inimigo->ativa_especial)
-                inimigo->frame_atual_proj = (inimigo->frame_atual_proj + 1) % 4;
+                inimigo->frame_atual_proj = (inimigo->frame_atual_proj + 1) % 5;
             else
                 inimigo->frame_atual_proj = (inimigo->frame_atual_proj + 1) % 4;
         }
@@ -293,9 +283,17 @@ void desenha_projeteis_inimigo(inimigo *inimigo, unsigned short max_x, unsigned 
                 frame_height = infos_inimigos->ap4;
                 break;
             case 5: // boss1
-                sprite_projetil = infos_inimigos->projetil_boss1;
-                frame_width = infos_inimigos->lpb1;
-                frame_height = infos_inimigos->apb1;
+                if(inimigo->ativa_especial){
+                    sprite_projetil = infos_inimigos->projetil_boss1_especial;
+                    frame_width = infos_inimigos->lpbe1;
+                    frame_height = infos_inimigos->apbe1; 
+                }
+                else {
+                    sprite_projetil = infos_inimigos->projetil_boss1;
+                    frame_width = infos_inimigos->lpb1;
+                    frame_height = infos_inimigos->apb1;    
+                }
+                
                 break;
             case 6: // boss2
                 sprite_projetil = infos_inimigos->projetil_boss2;
